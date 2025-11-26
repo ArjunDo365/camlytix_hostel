@@ -106,7 +106,7 @@ const AppSettings = () => {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">App Settings</h2>
-          <p className="text-gray-600">Manage App Settings in the organisation</p>
+          <p className="text-gray-600">Manage App Settings in the hostel</p>
         </div>
          <div className="flex gap-2">
            
