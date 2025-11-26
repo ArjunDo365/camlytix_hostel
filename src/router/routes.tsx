@@ -6,14 +6,15 @@ import Blocks from '../pages/Blocks';
 import Floors from '../pages/Floors';
 import Section from '../pages/Section';
 import Student from '../pages/Student';
+import NewLogin from '../pages/NewLogin';
 const Index = lazy(() => import('../pages/Index'));
 
 const routes = [
     // dashboard
     {
         path: '/',
-        element: <Index />,
-        layout: 'default',
+        element: <NewLogin />,
+        layout: 'blank',
     },
     {
         path: '/camera',

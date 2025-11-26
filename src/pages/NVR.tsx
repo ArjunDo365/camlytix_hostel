@@ -226,7 +226,7 @@ const NVR = () => {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">NVR Master</h2>
-          <p className="text-gray-600">Manage NVRs in the organisation</p>
+          <p className="text-gray-600">Manage NVRs in the hostel</p>
         </div>
 
         <div className="flex gap-2">
@@ -639,14 +639,14 @@ const NVR = () => {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-gray-200 bg-black hover:bg-black rounded-lg transition-colors flex gap-2"
+                  className="px-4 py-2 text-gray-200 bg-black hover:bg-black rounded-lg transition-colors flex gap-2 items-center"
                 >
                   <XCircle/>
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors flex gap-2"
+                  className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors flex gap-2 items-center"
                 >
                   <Save/>
                   {editingNvr ? "Update" : "Create"} NVR
