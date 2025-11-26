@@ -1,0 +1,412 @@
+import { Edit, Plus, Save, Trash2, XCircle } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { CommonHelper } from "../helper/helper";
+import { Block, Floor, Section as s} from "../types/types";
+import Swal from "sweetalert2";
+import { CommonService } from "../service/commonservice.page";
+
+const Section = () => {
+  const [showModal, setShowModal] = useState(false);
+  const [sections, setSections] = useState<s[]>([]);
+  const [floors, setFloors] = useState<Floor[] | null>([]);
+  const [blocks, setBlocks] = useState<Block[] | null>([]);
+  const [editingSection, setEditingSection] = useState<s | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({
+    name: "",
+    floor_id: 0,
+    description: "",
+    display_order: 0,
+  });
+
+   const [searchText, setSearchText] = useState("");
+      const filterData = sections.filter((sec: any) => {
+    const text = searchText.toLowerCase();
+  
+    return (
+      sec.name?.toLowerCase().includes(text) ||
+      sec.description?.toLowerCase().includes(text) ||
+      sec.block_name?.toLowerCase().includes(text) ||
+      sec.floor_name?.toLowerCase().includes(text) 
+    );
+  });  
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      floor_id: 0,
+      description: "",
+      display_order: 0,
+    });
+    setEditingSection(null);
+  };
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [sectionData, floorData, blockData] = await Promise.all([
+              CommonService.GetAll("/SectionList"),
+              CommonService.GetAll("/FloorList"),
+              CommonService.GetAll("/BlockList")
+      ]);
+      if (sectionData.success) {
+        setSections(sectionData.data);
+      }
+      if (floorData.success) {
+        setFloors(floorData.data);
+      }
+      if (blockData.success) {
+        setBlocks(blockData.data);
+      }
+    } catch (error) {
+      console.error("Error loading data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = (section: s) => {
+    setEditingSection(section);
+    setFormData({
+      name: section.name,
+      floor_id: section.floor_id,
+      description: section.description,
+      display_order: section.display_order,
+    });
+    setShowModal(true);
+  };
+
+  const handleDelete = async (section: s) => {
+    Swal.fire({
+      icon: "warning",
+      title: "Are you sure?",
+      text: "You want to Delete " + " " + section.name + "!",
+      showCancelButton: true,
+      confirmButtonText: "Delete",
+      confirmButtonColor:'red',
+      padding: "2em",
+      customClass: { popup: "sweet-alerts" },
+    }).then(async (result) => {
+      if (result.value) {
+        let res: any;
+        res = await CommonService.CommonDelete(`/SectionDelete/${section.id}`);
+        // console.log("resp from delete: ", res);
+        if (res.success) {
+          await loadData();
+          CommonHelper.SuccessToaster(res.message);
+        } else {
+          CommonHelper.ErrorToaster(res.message);
+        }
+      }
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (formData.floor_id === 0 || formData.display_order == 0) {
+      CommonHelper.ErrorToaster(
+        formData.floor_id === 0
+          ? "Please select a floor."
+          : "please enter the display order"
+      );
+      return;
+    }
+
+    try {
+      // console.log("payload for section api: ", editingSection?.id, formData);
+
+      let result;
+      if (editingSection) {
+        result = await CommonService.CommonPut(
+                  formData,
+                  `/SectionUpdate/${editingSection.id}`
+                );
+        if (result.success) CommonHelper.SuccessToaster(result.message);
+      } else {
+        result = await CommonService.CommonPost(formData, "/SectionInsert");
+        if (result.success) CommonHelper.SuccessToaster(result.message);
+      }
+
+      if (result.success) {
+        await loadData();
+        setShowModal(false);
+        resetForm();
+      } else {
+        CommonHelper.ErrorToaster(result.error || "Operation failed");
+        // alert(result.error || "Operation failed");
+      }
+    } catch (error) {
+      console.error("Error saving section:", error);
+      CommonHelper.ErrorToaster("An error occurred");
+      // alert("An error occurred");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Section Master</h2>
+          <p className="text-gray-600">Manage sections in the organisation</p>
+        </div>
+        <div className="flex gap-2">
+     <button
+          onClick={() => {
+            resetForm();
+            setShowModal(true);
+          }}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+        >
+          <Plus size={20} />
+          Add Section
+        </button>
+         <input
+    type="text"
+    placeholder="Search..."
+    className="px-3 py-2 border rounded-lg focus:ring focus:ring-purple-300 text-black"
+    
+    value={searchText}
+    onChange={(e) => setSearchText(e.target.value)}
+  />
+        </div>
+       
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Section Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Floor Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Block Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filterData.map((section) => (
+                <tr key={section.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      {/* <div className="flex-shrink-0 h-10 w-10">
+                        <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
+                          <span className="text-white font-medium">
+                            {section.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      </div> */}
+                      <div className="">
+                        <div className="text-sm font-medium text-gray-900">
+                          {section.name}
+                        </div>
+                        {/* <div className="text-sm text-gray-500">{user.email}</div> */}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {/* <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      user.role_name === 'Admin' 
+                        ? 'bg-purple-100 text-purple-800'
+                        : 'bg-green-100 text-green-800'
+                    }`}> */}
+                    {section.floor_name}
+                    {/* {floors?.find(f => f.id === section.floor_id)?.name || "Unknown"} */}
+                    {/* </span> */}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {/* <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      user.role_name === 'Admin' 
+                        ? 'bg-purple-100 text-purple-800'
+                        : 'bg-green-100 text-green-800'
+                    }`}> */}
+                    {section.block_name}
+                    {/* {floors?.find(f => f.id === section.floor_id)?.name || "Unknown"} */}
+                    {/* </span> */}
+                  </td>
+                  {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {section.block}
+                  </td> */}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => handleEdit(section)}
+                        className="bg-blue-600 hover:bg-blue-700 flex items-center gap-1 rounded-full p-2"
+                      >
+                        <Edit size={20} className="!text-white"/>
+                      </button>
+                      <button
+                        onClick={() => handleDelete(section)}
+                        className="bg-red-600 hover:bg-red-700 flex items-center gap-1 rounded-full p-2"
+                      >
+                        <Trash2 size={20} className="!text-white"/>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {editingSection ? "Edit Section" : "Add Section"}
+              </h3>
+            </div>
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Section Name
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData((prevData) => ({
+                      ...prevData,
+                      name: e.target.value,
+                    }))
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData((prevData) => ({
+                      ...prevData,
+                      description: e.target.value,
+                    }))
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Floor
+                </label>
+                <select
+                  value={formData.floor_id}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      floor_id: parseInt(e.target.value),
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                  required
+                  
+                >
+                  <option value={0} key={0}>
+                    -- Select Floor --
+                  </option>
+                  {floors?.map((floor) => (
+                    <option key={floor.id} value={floor.id}>
+                     {floor.block_name} &gt; {floor.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Display Order
+                </label>
+                <input
+                  type="number"
+                  value={formData.display_order}
+                  onChange={(e) => {
+                    const valueConvert = e.target.value ? e.target.value : "0";
+                    setFormData((prevData) => ({
+                      ...prevData,
+                      display_order: parseInt(valueConvert),
+                    }));
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                  required
+                />
+              </div>
+              {/* <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Block 
+                </label>
+                <div className="relative">
+                  <select
+                  value={formData.block}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      block: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                >
+                  {blocks.map((block) => (
+                    <option key={block.id} value={block.id}>
+                      {block.name}
+                    </option>
+                  ))}
+                </select>
+                </div>
+              </div> */}
+
+              <div className="flex justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 text-gray-200 bg-black hover:bg-black rounded-lg transition-colors flex gap-2 "
+                >
+                  <XCircle/>
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors flex gap-2"
+                >
+                  <Save/>
+                  {editingSection ? "Update" : "Create"} Section
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Section;

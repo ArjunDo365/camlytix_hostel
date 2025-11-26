@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { CommonHelper } from '../helper/helper';
 
-const APIURL = '/adminapi/api';
+const APIURL = '/admin/api';
 
 export abstract class CommonService {
     private static setHeaders() {
