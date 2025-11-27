@@ -180,7 +180,7 @@ const Student = () => {
     const fileType = file.type;
     if (fileType.startsWith("image/")) {
       const pbase64 = await convertToBase64(file);
-      // console.log("base64 image string: ", base64);
+      // console.log("base64 image string: ", pbase64);
       // const removePrefix = (base64 as string).split(",")[1];
       setFormData((prevData) => ({
         ...prevData,
@@ -469,7 +469,7 @@ const Student = () => {
                 </div>
                 <div className="relative  w-full border-2 border-blue-500 rounded-md p-3 flex items-center justify-evenly w-full">
                   <label
-                    htmlFor="student_image"
+                    htmlFor="profile_image"
                     className="required-label text-center m-0"
                   >
                     Image
@@ -477,24 +477,24 @@ const Student = () => {
 
                   <div className="text-center">
                     <input
-                      id="student"
+                      id="profile_image"
                       type="file"
                       accept=".jpeg, .jpg, .png"
-                      className="opacity-0 absolute z-[-1]"
+                      className="hidden"
                       // required
                       onChange={(event) =>
-                        handleFileChange(event, "student_image")
+                        handleFileChange(event, "profile_image")
                       }
                     />
                     <label
-                      htmlFor="student_image"
+                      htmlFor="profile_image"
                       className="cursor-pointer m-0 inline-block py-2 px-4 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600"
                     >
                       Choose File
                     </label>
                     <br />
                     {/* <span className="text-danger">
-                    {userValidation["student_image"]}
+                    {userValidation["profile_image"]}
                   </span> */}
                   </div>
 
