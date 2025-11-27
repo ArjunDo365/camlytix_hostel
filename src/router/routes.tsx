@@ -7,6 +7,7 @@ import Floors from '../pages/Floors';
 import Section from '../pages/Section';
 import Student from '../pages/Student';
 import NewLogin from '../pages/NewLogin';
+import Dashboard from '../pages/Dashboard';
 const Index = lazy(() => import('../pages/Index'));
 
 const routes = [
@@ -15,6 +16,11 @@ const routes = [
         path: '/',
         element: <NewLogin />,
         layout: 'blank',
+    },
+    {
+        path: '/dashboard',
+        element: <Dashboard />,
+        layout: 'default',
     },
     {
         path: '/camera',

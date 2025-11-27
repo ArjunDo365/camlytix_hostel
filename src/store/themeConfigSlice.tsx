@@ -134,7 +134,7 @@ const themeConfigSlice = createSlice({
         },
 
         setPageTitle(state, { payload }) {
-            document.title = `${payload} | Circuit Digest`;
+            document.title = `${payload} | DO365 TECHNOLOGIES`;
         },
     },
 });
