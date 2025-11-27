@@ -12,15 +12,15 @@ export interface Section {
 
 export interface Floor {
   block_name: ReactNode;
-  id: number;
+  id: string;
   name: string;
-  block_id: number;
+  block_id: string;
   description: string;
   display_order?: number;
 }
 
 export interface Block {
-  id: number;
+  id: string;
   name: string;
   description: string;
   display_order: number;

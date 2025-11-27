@@ -10,13 +10,13 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  server: {
-    proxy: {
-      "/admin": {
-        target: "https://camlytix.do365tech.in",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/admin/, "/admin"),
-      },
-    },
-  },
+  // server: {
+  //   proxy: {
+  //     "/admin": {
+  //       target: "https://camlytix.do365tech.in",
+  //       changeOrigin: true,
+  //       rewrite: (path) => path.replace(/^\/admin/, "/admin"),
+  //     },
+  //   },
+  // },
 });

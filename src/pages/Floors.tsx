@@ -14,7 +14,7 @@ const Floors = () => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    block_id: 0,
+    block_id: "",
     display_order: 0,
   });
 
@@ -37,7 +37,7 @@ const Floors = () => {
     setFormData({
       name: "",
       description: "",
-      block_id: 0,
+      block_id: "",
       display_order: 0,
     });
     setEditingFloor(null);
@@ -49,15 +49,17 @@ const Floors = () => {
         CommonService.GetAll("/FloorList"),
         CommonService.GetAll("/BlockList"),
       ]);
-      // console.log("data from backend for floor: ", floorData);
+      console.log("data from backend for floor block: ", floorData, blockData);
 
-      if (floorData.success) {
-        setFloors(floorData.data);
-      }
+      if (floorData.length > 0) {
+        setFloors(floorData);
+      } 
+      else setFloors([]);
 
-      if (blockData.success) {
-        setBlocks(blockData.data);
-      }
+      if (blockData.length > 0) {
+        setBlocks(blockData);
+      } 
+      else setBlocks([]);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -70,7 +72,7 @@ const Floors = () => {
     setFormData({
       name: floor.name,
       description: floor.description,
-      block_id: floor.block_id ?? 0,
+      block_id: floor.block_id ?? "",
       display_order: floor.display_order ?? 0,
     });
     setShowModal(true);
@@ -91,11 +93,11 @@ const Floors = () => {
         let res: any;
         res = await CommonService.CommonDelete(`/FloorDelete/${floor.id}`);
         // console.log("resp from delete: ", res);
-        if (res.success) {
+        if (res.Type == "S") {
           await loadData();
-          CommonHelper.SuccessToaster(res.message);
+          CommonHelper.SuccessToaster(res.Message);
         } else {
-          CommonHelper.ErrorToaster(res.message);
+          CommonHelper.ErrorToaster(res.Message);
         }
       }
     });
@@ -104,7 +106,7 @@ const Floors = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (formData.block_id === 0 || !formData.block_id) {
+    if (formData.block_id === "" || !formData.block_id) {
       CommonHelper.ErrorToaster("Please select a block");
       return;
     }
@@ -116,17 +118,18 @@ const Floors = () => {
       // console.log("payload for block api: ", editingBlock?.id, formData);
       let result;
       if (editingFloor) {
-        result = await CommonService.CommonPut(
-          formData,
-          `/FloorUpdate/${editingFloor.id}`
-        );
-        if (result.success) CommonHelper.SuccessToaster(result.message);
+        const pay = { ...formData, id: editingFloor.id };
+        result = await CommonService.CommonPut(pay, `/FloorUpdate`);
+        if (result.Type == "S") CommonHelper.SuccessToaster(result.Message);
       } else {
-        result = await CommonService.CommonPost(formData, "/FloorInsert");
-        if (result.success) CommonHelper.SuccessToaster(result.message);
+        result = await CommonService.CommonPost(
+          { ...formData, created_by_id: "1" },
+          "/FloorInsert"
+        );
+        if (result.Type == "S") CommonHelper.SuccessToaster(result.Message);
       }
 
-      if (result.success) {
+      if (result.Type == "S") {
         await loadData();
         setShowModal(false);
         resetForm();
@@ -140,6 +143,8 @@ const Floors = () => {
       // alert("An error occurred");
     }
   };
+
+  // console.log('checking state: ',formData)
 
   if (loading) {
     return (
@@ -300,10 +305,10 @@ const Floors = () => {
                 <select
                   value={formData.block_id}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      block_id: parseInt(e.target.value),
-                    })
+                    setFormData((prevData) => ({
+                      ...prevData,
+                      block_id: e.target.value,
+                    }))
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
                   required

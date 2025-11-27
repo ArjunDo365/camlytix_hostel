@@ -16,16 +16,16 @@ const Blocks = () => {
     display_order: 0,
   });
 
-   const [searchText, setSearchText] = useState("");
-    const filterData = blocks.filter((block: any) => {
-  const text = searchText.toLowerCase();
+  const [searchText, setSearchText] = useState("");
 
-  return (
-    block.name?.toLowerCase().includes(text) ||
-    block.description?.toLowerCase().includes(text) 
+  const filterData = blocks?.filter((block: any) => {    
+    const text = searchText?.toLowerCase();
 
-  );
-});  
+    return (
+      block.name?.toLowerCase().includes(text) ||
+      block.description?.toLowerCase().includes(text)
+    );
+  });
 
   useEffect(() => {
     loadData();
@@ -44,12 +44,13 @@ const Blocks = () => {
     try {
       setLoading(true);
       const blockData = await CommonService.GetAll("/BlockList");
-        
+
       // console.log("data from backend for blocks: ", blockData);
 
-      if (blockData.success) {
-        setBlocks(blockData.data);
+      if (blockData.length > 0) {
+        setBlocks(blockData);
       }
+      else setBlocks([]);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -74,7 +75,7 @@ const Blocks = () => {
       text: "You want to Delete " + " " + block.name + "!",
       showCancelButton: true,
       confirmButtonText: "Delete",
-      confirmButtonColor:'red',
+      confirmButtonColor: "red",
       padding: "2em",
       customClass: { popup: "sweet-alerts" },
     }).then(async (result) => {
@@ -82,11 +83,11 @@ const Blocks = () => {
         let res: any;
         res = await CommonService.CommonDelete(`/BlockDelete/${block.id}`);
         // console.log("resp from delete: ", res);
-        if (res.success) {
+        if (res.Type=='S') {
           await loadData();
-          CommonHelper.SuccessToaster(res.message);
+          CommonHelper.SuccessToaster(res.Message);
         } else {
-          CommonHelper.ErrorToaster(res.message);
+          CommonHelper.ErrorToaster(res.Message);
         }
       }
     });
@@ -104,21 +105,25 @@ const Blocks = () => {
       // console.log("payload for block api: ", editingBlock?.id, formData);
       let result;
       if (editingBlock) {
+        const pay = {...formData,id:editingBlock.id}
         // console.log('payload for block update: ',formData);
         result = await CommonService.CommonPut(
-          formData,
-          `/BlockUpdate/${editingBlock.id}`
+          pay,
+          `/BlockUpdate`
         );
-        if (result.success) CommonHelper.SuccessToaster(result.message);
+        if (result.Type=='S') CommonHelper.SuccessToaster(result.Message);
         // console.log('result on edit block submit',result);
       } else {
         // console.log('payload for block submit: ',formData);
-        result = await CommonService.CommonPost(formData, "/BlockInsert");
-        if (result.success) CommonHelper.SuccessToaster(result.message);
+        result = await CommonService.CommonPost(
+          { ...formData, created_by_id: "1" },
+          "/BlockInsert"
+        );
+        if (result.Type == 'S') CommonHelper.SuccessToaster(result.Message);
         // console.log('result on block submit',result);
       }
 
-      if (result.success) {
+      if (result.Type=='S') {
         await loadData();
         setShowModal(false);
         resetForm();
@@ -152,26 +157,24 @@ const Blocks = () => {
         </div>
 
         <div className="flex gap-2">
-            <button
-          onClick={() => {
-            resetForm();
-            setShowModal(true);
-          }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-        >
-          <Plus size={20} />
-          Add Block
-        </button>
+          <button
+            onClick={() => {
+              resetForm();
+              setShowModal(true);
+            }}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          >
+            <Plus size={20} />
+            Add Block
+          </button>
           <input
-    type="text"
-    placeholder="Search..."
-    className="px-3 py-2 border rounded-lg focus:ring focus:ring-purple-300 text-black"
-    
-    value={searchText}
-    onChange={(e) => setSearchText(e.target.value)}
-  />
+            type="text"
+            placeholder="Search..."
+            className="px-3 py-2 border rounded-lg focus:ring focus:ring-purple-300 text-black"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
         </div>
-
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -194,7 +197,7 @@ const Blocks = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filterData.map((block) => (
+              {filterData?.map((block) => (
                 <tr key={block.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -227,13 +230,13 @@ const Blocks = () => {
                         onClick={() => handleEdit(block)}
                         className="bg-blue-600 hover:bg-blue-700 flex items-center gap-1 rounded-full p-2"
                       >
-                        <Edit size={20} className="!text-white"/>
+                        <Edit size={20} className="!text-white" />
                       </button>
                       <button
                         onClick={() => handleDelete(block)}
                         className="bg-red-600 hover:bg-red-700 flex items-center gap-1 rounded-full p-2"
                       >
-                        <Trash2 size={20} className="!text-white"/>
+                        <Trash2 size={20} className="!text-white" />
                       </button>
                     </div>
                   </td>
@@ -311,14 +314,14 @@ const Blocks = () => {
                   onClick={() => setShowModal(false)}
                   className="px-4 py-2 text-gray-200 bg-black hover:bg-black rounded-lg transition-colors flex gap-2 items-center"
                 >
-                 <XCircle/>
+                  <XCircle />
                   Cancel
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors flex gap-2 items-center"
-                > 
-                  <Save/>
+                >
+                  <Save />
                   {editingBlock ? "Update" : "Create"} Block
                 </button>
               </div>
