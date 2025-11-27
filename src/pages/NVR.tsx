@@ -15,8 +15,8 @@ const NVR = () => {
   const [editingNvr, setEditingNvr] = useState<Nvr | null>(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    id: 0,
-    location_id: 0,
+    id: "",
+    section_id: "",
     asset_no: "",
     serial_number: "",
     model_name: "",
@@ -29,20 +29,21 @@ const NVR = () => {
   const [errors, setErrors] = useState({
     ip_address: "",
   });
-     const [searchText, setSearchText] = useState("");
 
-    const filterData = nvrs.filter((nvr: any) => {
-  const text = searchText.toLowerCase();
+  const [searchText, setSearchText] = useState("");
 
-  return (
-    nvr.asset_no?.toLowerCase().includes(text) ||
-    nvr.model_name?.toLowerCase().includes(text) ||
-    nvr.ip_address?.toLowerCase().includes(text) ||
-    nvr.location_name?.toLowerCase().includes(text) ||
-    nvr.floor_name?.toLowerCase().includes(text) ||
-    nvr.block_name?.toLowerCase().includes(text)
-  );
-});
+  const filterData = nvrs.filter((nvr: any) => {
+    const text = searchText.toLowerCase();
+
+    return (
+      nvr.asset_no?.toLowerCase().includes(text) ||
+      nvr.model_name?.toLowerCase().includes(text) ||
+      nvr.ip_address?.toLowerCase().includes(text) ||
+      nvr.location_name?.toLowerCase().includes(text) ||
+      nvr.floor_name?.toLowerCase().includes(text) ||
+      nvr.block_name?.toLowerCase().includes(text)
+    );
+  });
 
   useEffect(() => {
     loadData();
@@ -50,8 +51,8 @@ const NVR = () => {
 
   const resetForm = () => {
     setFormData({
-      id: 0,
-      location_id: 0,
+      id: "",
+      section_id: "",
       asset_no: "",
       serial_number: "",
       model_name: "",
@@ -65,22 +66,24 @@ const NVR = () => {
   };
 
   const loadData = async () => {
-    
     try {
       setLoading(true);
-      const [nvrData, floorData] = await Promise.all([
-               
-        CommonService.GetAll("/NVRList"),
-        CommonService.GetAll("/SectionList")
+      const [nvrData, sectionData] = await Promise.all([
+        CommonService.GetAll("/NvrList"),
+        CommonService.GetAll("/SectionList"),
       ]);
-      // console.log("data from backend for blocks: ", blockData);
+      console.log("data from backend for nvr,section: ", nvrData,sectionData);
 
-      if (nvrData.success) {
-        setNvrs(nvrData.data);
-      }
-      if (floorData.success) {
-        setFloors(floorData.data);
-      }
+      if (nvrData.length > 0) {
+        setNvrs(nvrData);
+      } 
+      else setNvrs([]);
+
+      if (sectionData.length > 0) {
+        setFloors(sectionData);
+      } 
+      else setFloors([]);
+
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -92,7 +95,7 @@ const NVR = () => {
     setEditingNvr(nvr);
     setFormData({
       id: nvr.id,
-      location_id: nvr.location_id,
+      section_id: nvr.section_id,
       asset_no: nvr.asset_no,
       serial_number: nvr.serial_number,
       model_name: nvr.model_name,
@@ -112,19 +115,19 @@ const NVR = () => {
       text: "You want to Delete " + " " + n.asset_no + "!",
       showCancelButton: true,
       confirmButtonText: "Delete",
-      confirmButtonColor:'red',
+      confirmButtonColor: "red",
       padding: "2em",
       customClass: { popup: "sweet-alerts" },
     }).then(async (result) => {
       if (result.value) {
         let res: any;
-        res = await CommonService.CommonDelete(`/NVRDelete/${n.id}`);
+        res = await CommonService.CommonDelete(`/NvrDelete/${n.id}`);
         // console.log("resp from delete: ", res);
-        if (res.success) {
+        if ((res.Type = "S")) {
           await loadData();
-          CommonHelper.SuccessToaster(res.message);
+          CommonHelper.SuccessToaster(res.Message);
         } else {
-          CommonHelper.ErrorToaster(res.message);
+          CommonHelper.ErrorToaster(res.Message);
         }
       }
     });
@@ -137,10 +140,9 @@ const NVR = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    
     e.preventDefault();
 
-    if (formData.location_id === 0) {
+    if (formData.section_id === "") {
       CommonHelper.ErrorToaster("Please select a location");
       return;
     }
@@ -159,21 +161,22 @@ const NVR = () => {
       // console.log("payload for block api: ", editingBlock?.id, formData);
       let result;
       if (editingNvr) {
-        console.log("payload for block update: ", editingNvr?.id, formData);
-        result = await CommonService.CommonPut(
-          formData,
-          `/NVRUpdate/${editingNvr.id}`
-        );
-        if (result.success) CommonHelper.SuccessToaster(result.message);
-        console.log("result on edit block submit", result);
+        // console.log("payload for block update: ", editingNvr?.id, formData);
+        const pay = { ...formData, id: editingNvr.id };
+        result = await CommonService.CommonPut(formData, `/NvrUpdate`);
+        if (result.Type == "S") CommonHelper.SuccessToaster(result.Message);
+        // console.log("result on edit block submit", result);
       } else {
-        console.log("payload for block submit: ", formData);
-        result = await CommonService.CommonPost(formData, "/NVRInsert");
-        if (result.success) CommonHelper.SuccessToaster(result.message);
+        // console.log("payload for block submit: ", formData);
+        result = await CommonService.CommonPost(
+          { ...formData, created_by_id: "b5cec1c6-8783-4e60-b88b-d49d8ae658a7" },
+          "/NvrInsert"
+        );
+        if (result.Type == "S") CommonHelper.SuccessToaster(result.Message);
         console.log("result on block submit", result);
       }
 
-      if (result.success) {
+      if (result.Type == "S") {
         await loadData();
         setShowModal(false);
         resetForm();
@@ -189,27 +192,24 @@ const NVR = () => {
   };
 
   const updateNvrStatus = async (payload: typeof formData) => {
-  try {
-    console.log("Updating NVR with full data:", payload);
+    try {
+      console.log("Updating NVR with full data:", payload);
+      // const pay = {...payload,id:}
+      const result = await CommonService.CommonPut(payload, `/NvrUpdate`);
 
-    const result = await CommonService.CommonPut(
-          payload,
-          `/NVRUpdate/${payload.id}`
+      if (result.Type == "S") {
+        CommonHelper.SuccessToaster(
+          result.message || "Status updated successfully"
         );
-
-    if (result.success) {
-      CommonHelper.SuccessToaster(result.message || "Status updated successfully");
-      await loadData(); // refresh table
-    } else {
-      CommonHelper.ErrorToaster(result.message || "Failed to update NVR");
+        await loadData(); // refresh table
+      } else {
+        CommonHelper.ErrorToaster(result.message || "Failed to update NVR");
+      }
+    } catch (error) {
+      console.error("Error updating NVR:", error);
+      CommonHelper.ErrorToaster("An error occurred");
     }
-  } catch (error) {
-    console.error("Error updating NVR:", error);
-    CommonHelper.ErrorToaster("An error occurred");
-  }
-};
-
-
+  };
 
   if (loading) {
     return (
@@ -231,25 +231,23 @@ const NVR = () => {
 
         <div className="flex gap-2">
           <button
-          onClick={() => {
-            resetForm();
-            setShowModal(true);
-          }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-        >
-          <Plus size={20} />
-          Add NVR
-        </button>
-           <input
-    type="text"
-    placeholder="Search..."
-    className="px-3 py-2 border rounded-lg focus:ring focus:ring-purple-300 text-black"
-    
-    value={searchText}
-    onChange={(e) => setSearchText(e.target.value)}
-  />
+            onClick={() => {
+              resetForm();
+              setShowModal(true);
+            }}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          >
+            <Plus size={20} />
+            Add NVR
+          </button>
+          <input
+            type="text"
+            placeholder="Search..."
+            className="px-3 py-2 border rounded-lg focus:ring focus:ring-purple-300 text-black"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
         </div>
-        
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -266,18 +264,18 @@ const NVR = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Location
                 </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            IP Address
-                          </th>
-                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Last Working on
-                          </th>
-                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Is Working
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
-                          </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  IP Address
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Last Working on
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Is Working
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
                 {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Last Working on
                 </th> */}
@@ -317,66 +315,65 @@ const NVR = () => {
                       {n.block_name} &gt; {n.floor_name} &gt; {n.location_name}
                     </div>
                   </td>
-                   <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">
-                                {n.ip_address} 
-                              </div>
-                            </td>
-                             <td className="px-6 py-4 whitespace-nowrap">
-                         <div className="text-sm text-gray-500">
-  {n.last_working_on
-    ? new Date(n.last_working_on)
-        .toLocaleString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        })
-        .replace(/ /g, "-")
-        .replace(",-", " ")
-    : "-"
-  }
-</div>
-                            </td>
-                               <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm">
-                                {n.is_working == 0 ? (
-                                  <span className="px-3 py-1 rounded-full bg-red-200 text-red-800 font-medium">
-                                    Not Working
-                                  </span>
-                                ) : (
-                                  <span className="px-3 py-1 rounded-full bg-green-200 text-green-800 font-medium">
-                                    Working
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                            
-                             <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm flex items-center">
-  <label className="w-12 h-6 relative block">
-    <input
-      type="checkbox"
-      className="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
-      checked={!!n.status}
-      onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const updatedStatus = e.target.checked ? 1 : 0;
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">{n.ip_address}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">
+                      {n.last_working_on
+                        ? new Date(n.last_working_on)
+                            .toLocaleString("en-GB", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true,
+                            })
+                            .replace(/ /g, "-")
+                            .replace(",-", " ")
+                        : "-"}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm">
+                      {n.is_working == 0 ? (
+                        <span className="px-3 py-1 rounded-full bg-red-200 text-red-800 font-medium">
+                          Not Working
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 rounded-full bg-green-200 text-green-800 font-medium">
+                          Working
+                        </span>
+                      )}
+                    </div>
+                  </td>
 
-        // Create full payload for this row, updating only status
-        const payload = { ...n, status: updatedStatus };
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm flex items-center">
+                      <label className="w-12 h-6 relative block">
+                        <input
+                          type="checkbox"
+                          className="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                          checked={!!n.status}
+                          onChange={async (
+                            e: React.ChangeEvent<HTMLInputElement>
+                          ) => {
+                            const updatedStatus = e.target.checked ? 1 : 0;
 
-        // Optionally update local formData if needed
-        setFormData(payload);
+                            // Create full payload for this row, updating only status
+                            const payload = { ...n, status: updatedStatus };
 
-        // Call API to update the full NVR data
-        await updateNvrStatus(payload);
-      }}
-    />
+                            // Optionally update local formData if needed
+                            setFormData(payload);
 
-    <span
-      className="bg-[#ebedf2] 
+                            // Call API to update the full NVR data
+                            await updateNvrStatus(payload);
+                          }}
+                        />
+
+                        <span
+                          className="bg-[#ebedf2] 
         block h-full rounded-full 
         border-2 border-blue-300
         peer-checked:bg-blue-600 
@@ -386,17 +383,14 @@ const NVR = () => {
         before:bottom-1 before:w-4 before:h-4 
         before:rounded-full peer-checked:before:left-7 
         before:transition-all before:duration-300"
-    ></span>
-  </label>
+                        ></span>
+                      </label>
 
-  {/* <span className="ml-2 font-medium">
+                      {/* <span className="ml-2 font-medium">
     {n.status == 0 ? "Inactive" : "Active"}
   </span> */}
-</div>
-
-                             </td>
-                         
-
+                    </div>
+                  </td>
 
                   {/* <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">{n.last_working_on}</div>
@@ -411,13 +405,13 @@ const NVR = () => {
                         onClick={() => handleEdit(n)}
                         className="bg-blue-600 hover:bg-blue-700 flex items-center gap-1 rounded-full p-2"
                       >
-                        <Edit size={20} className="!text-white"/>
+                        <Edit size={20} className="!text-white" />
                       </button>
                       <button
                         onClick={() => handleDelete(n)}
                         className="bg-red-600 hover:bg-red-700 flex items-center gap-1 rounded-full p-2"
                       >
-                        <Trash2 size={20} className="!text-white"/>
+                        <Trash2 size={20} className="!text-white" />
                       </button>
                     </div>
                   </td>
@@ -562,20 +556,20 @@ const NVR = () => {
                     Location
                   </label>
                   <select
-                    value={formData.location_id}
+                    value={formData.section_id}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        location_id: parseInt(e.target.value),
+                        section_id: e.target.value,
                       })
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
                     required
                   >
-                    <option value={0}>-- Select Location --</option>
+                    <option value="">-- Select Location --</option>
                     {floors.map((f) => (
                       <option key={f.id} value={f.id}>
-                       {f.block_name} &gt; {f.floor_name} &gt; {f.name}
+                        {f.block_name} &gt; {f.floor_name} &gt; {f.name}
                       </option>
                     ))}
                   </select>
@@ -585,7 +579,7 @@ const NVR = () => {
                     Installed Date
                   </label>
                   <Flatpickr
-                    value={formData.install_date}
+                    value={moment(formData.install_date).format("DD-MM-YYYY")}
                     options={{
                       dateFormat: "d-m-Y",
                       position: "auto left",
@@ -596,30 +590,30 @@ const NVR = () => {
                       setFormData((prevData) => ({
                         ...prevData,
                         install_date: date[0]
-                          ? moment(date[0]).format("DD-MM-YYYY")
+                          ? moment(date[0]).format("YYYY-MM-DD")
                           : "",
                       }));
                     }}
                   />
                 </div>
-               {editingNvr && (
-  <div>
-    <label className="w-12 h-6 relative block">
-      <input
-        type="checkbox"
-        className="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
-        id="custom_switch_checkbox1"
-        checked={!!formData.status}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setFormData((prevData) => ({
-            ...prevData,
-            status: e.target.checked ? 1 : 0,
-          }))
-        }
-      />
+                {editingNvr && (
+                  <div>
+                    <label className="w-12 h-6 relative block">
+                      <input
+                        type="checkbox"
+                        className="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                        id="custom_switch_checkbox1"
+                        checked={!!formData.status}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setFormData((prevData) => ({
+                            ...prevData,
+                            status: e.target.checked ? 1 : 0,
+                          }))
+                        }
+                      />
 
-      <span
-        className="bg-[#ebedf2] 
+                      <span
+                        className="bg-[#ebedf2] 
         block h-full rounded-full 
         border-2 border-blue-300
         peer-checked:bg-blue-600 
@@ -629,11 +623,10 @@ const NVR = () => {
         before:bottom-1 before:w-4 before:h-4 
         before:rounded-full peer-checked:before:left-7 
         before:transition-all before:duration-300"
-      ></span>
-    </label>
-  </div>
-)}
-
+                      ></span>
+                    </label>
+                  </div>
+                )}
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
@@ -641,14 +634,14 @@ const NVR = () => {
                   onClick={() => setShowModal(false)}
                   className="px-4 py-2 text-gray-200 bg-black hover:bg-black rounded-lg transition-colors flex gap-2 items-center"
                 >
-                  <XCircle/>
+                  <XCircle />
                   Cancel
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors flex gap-2 items-center"
                 >
-                  <Save/>
+                  <Save />
                   {editingNvr ? "Update" : "Create"} NVR
                 </button>
               </div>

@@ -1,7 +1,7 @@
 import { Edit, Plus, Save, Trash2, XCircle } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { CommonHelper } from "../helper/helper";
-import { Block, Floor, Section as s} from "../types/types";
+import { Block, Floor, Section as s } from "../types/types";
 import Swal from "sweetalert2";
 import { CommonService } from "../service/commonservice.page";
 
@@ -14,22 +14,22 @@ const Section = () => {
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
-    floor_id: 0,
+    floor_id: "",
     description: "",
     display_order: 0,
   });
 
-   const [searchText, setSearchText] = useState("");
-      const filterData = sections.filter((sec: any) => {
+  const [searchText, setSearchText] = useState("");
+  const filterData = sections.filter((sec: any) => {
     const text = searchText.toLowerCase();
-  
+
     return (
       sec.name?.toLowerCase().includes(text) ||
       sec.description?.toLowerCase().includes(text) ||
       sec.block_name?.toLowerCase().includes(text) ||
-      sec.floor_name?.toLowerCase().includes(text) 
+      sec.floor_name?.toLowerCase().includes(text)
     );
-  });  
+  });
 
   useEffect(() => {
     loadData();
@@ -38,7 +38,7 @@ const Section = () => {
   const resetForm = () => {
     setFormData({
       name: "",
-      floor_id: 0,
+      floor_id: "",
       description: "",
       display_order: 0,
     });
@@ -49,19 +49,19 @@ const Section = () => {
     setLoading(true);
     try {
       const [sectionData, floorData, blockData] = await Promise.all([
-              CommonService.GetAll("/SectionList"),
-              CommonService.GetAll("/FloorList"),
-              CommonService.GetAll("/BlockList")
+        CommonService.GetAll("/SectionList"),
+        CommonService.GetAll("/FloorList"),
+        CommonService.GetAll("/BlockList"),
       ]);
-      if (sectionData.success) {
-        setSections(sectionData.data);
-      }
-      if (floorData.success) {
-        setFloors(floorData.data);
-      }
-      if (blockData.success) {
-        setBlocks(blockData.data);
-      }
+      if (sectionData.length > 0) {
+        setSections(sectionData);
+      } else setSections([]);
+      if (floorData.length > 0) {
+        setFloors(floorData);
+      } else setFloors([]);
+      if (blockData.length > 0) {
+        setBlocks(blockData);
+      } else setBlocks([]);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -87,7 +87,7 @@ const Section = () => {
       text: "You want to Delete " + " " + section.name + "!",
       showCancelButton: true,
       confirmButtonText: "Delete",
-      confirmButtonColor:'red',
+      confirmButtonColor: "red",
       padding: "2em",
       customClass: { popup: "sweet-alerts" },
     }).then(async (result) => {
@@ -95,11 +95,11 @@ const Section = () => {
         let res: any;
         res = await CommonService.CommonDelete(`/SectionDelete/${section.id}`);
         // console.log("resp from delete: ", res);
-        if (res.success) {
+        if (res.Type='S') {
           await loadData();
-          CommonHelper.SuccessToaster(res.message);
+          CommonHelper.SuccessToaster(res.Message);
         } else {
-          CommonHelper.ErrorToaster(res.message);
+          CommonHelper.ErrorToaster(res.Message);
         }
       }
     });
@@ -108,9 +108,9 @@ const Section = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (formData.floor_id === 0 || formData.display_order == 0) {
+    if (formData.floor_id === "" || formData.display_order == 0) {
       CommonHelper.ErrorToaster(
-        formData.floor_id === 0
+        formData.floor_id === ""
           ? "Please select a floor."
           : "please enter the display order"
       );
@@ -122,17 +122,18 @@ const Section = () => {
 
       let result;
       if (editingSection) {
+        const pay = {...formData,id:editingSection.id}
         result = await CommonService.CommonPut(
-                  formData,
-                  `/SectionUpdate/${editingSection.id}`
-                );
-        if (result.success) CommonHelper.SuccessToaster(result.message);
+          pay,
+          `/SectionUpdate`
+        );
+        if (result.Type='S') CommonHelper.SuccessToaster(result.Message);
       } else {
-        result = await CommonService.CommonPost(formData, "/SectionInsert");
-        if (result.success) CommonHelper.SuccessToaster(result.message);
+        result = await CommonService.CommonPost({...formData,created_by_id:'1'}, "/SectionInsert");
+        if (result.Type='S') CommonHelper.SuccessToaster(result.Message);
       }
 
-      if (result.success) {
+      if (result.Type='S') {
         await loadData();
         setShowModal(false);
         resetForm();
@@ -165,26 +166,24 @@ const Section = () => {
           <p className="text-gray-600">Manage sections in the hostel</p>
         </div>
         <div className="flex gap-2">
-     <button
-          onClick={() => {
-            resetForm();
-            setShowModal(true);
-          }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-        >
-          <Plus size={20} />
-          Add Section
-        </button>
-         <input
-    type="text"
-    placeholder="Search..."
-    className="px-3 py-2 border rounded-lg focus:ring focus:ring-purple-300 text-black"
-    
-    value={searchText}
-    onChange={(e) => setSearchText(e.target.value)}
-  />
+          <button
+            onClick={() => {
+              resetForm();
+              setShowModal(true);
+            }}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          >
+            <Plus size={20} />
+            Add Section
+          </button>
+          <input
+            type="text"
+            placeholder="Search..."
+            className="px-3 py-2 border rounded-lg focus:ring focus:ring-purple-300 text-black"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
         </div>
-       
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -255,13 +254,13 @@ const Section = () => {
                         onClick={() => handleEdit(section)}
                         className="bg-blue-600 hover:bg-blue-700 flex items-center gap-1 rounded-full p-2"
                       >
-                        <Edit size={20} className="!text-white"/>
+                        <Edit size={20} className="!text-white" />
                       </button>
                       <button
                         onClick={() => handleDelete(section)}
                         className="bg-red-600 hover:bg-red-700 flex items-center gap-1 rounded-full p-2"
                       >
-                        <Trash2 size={20} className="!text-white"/>
+                        <Trash2 size={20} className="!text-white" />
                       </button>
                     </div>
                   </td>
@@ -324,19 +323,18 @@ const Section = () => {
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      floor_id: parseInt(e.target.value),
+                      floor_id: e.target.value,
                     })
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
                   required
-                  
                 >
                   <option value={0} key={0}>
                     -- Select Floor --
                   </option>
                   {floors?.map((floor) => (
                     <option key={floor.id} value={floor.id}>
-                     {floor.block_name} &gt; {floor.name}
+                      {floor.block_name} &gt; {floor.name}
                     </option>
                   ))}
                 </select>
@@ -390,14 +388,14 @@ const Section = () => {
                   onClick={() => setShowModal(false)}
                   className="px-4 py-2 text-gray-200 bg-black hover:bg-black rounded-lg transition-colors flex gap-2 items-center"
                 >
-                  <XCircle/>
+                  <XCircle />
                   Cancel
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors flex gap-2 items-center"
                 >
-                  <Save/>
+                  <Save />
                   {editingSection ? "Update" : "Create"} Section
                 </button>
               </div>

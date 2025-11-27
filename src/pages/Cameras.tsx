@@ -16,9 +16,9 @@ const Cameras = () => {
   const [editingCamera, setEditingCamera] = useState<Camera | null>(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    id: 0,
-    location_id: 0,
-    nvr_id: 0,
+    id: '',
+    section_id: '',
+    nvr_id: '',
     asset_no: "",
     serial_number: "",
     model_name: "",
@@ -55,9 +55,9 @@ const Cameras = () => {
 
   const resetForm = () => {
     setFormData({
-      id: 0,
-      location_id: 0,
-      nvr_id: 0,
+      id: '',
+      section_id: '',
+      nvr_id: '',
       asset_no: "",
       serial_number: "",
       model_name: "",
@@ -76,8 +76,8 @@ const Cameras = () => {
       setLoading(true);
       const [cameraData, nvrData, sectionData] = await Promise.all([
         CommonService.GetAll("/CameraList"),
-        CommonService.GetAll("/NVRList"),
-        CommonService.GetAll("/sectionList"),
+        CommonService.GetAll("/NvrList"),
+        CommonService.GetAll("/SectionList"),
       ]);
       console.log("data from backend for camera nvr section: ", cameraData,nvrData,sectionData);
 
@@ -101,7 +101,7 @@ const Cameras = () => {
     setEditingCamera(cam);
     setFormData({
       id: cam.id,
-      location_id: cam.location_id,
+      section_id: cam.section_id,
       nvr_id: cam.nvr_id,
       asset_no: cam.asset_no,
       serial_number: cam.serial_number,
@@ -192,7 +192,7 @@ const Cameras = () => {
         console.log("result on edit block submit", result);
       } else {
         console.log("payload for block submit: ", formData);
-        result = await CommonService.CommonPost(formData, "/CameraInsert");
+        result = await CommonService.CommonPost({...formData,created_by_id: "b5cec1c6-8783-4e60-b88b-d49d8ae658a7"}, "/CameraInsert");
         if (result.Type=='S') CommonHelper.SuccessToaster(result.Message);
         console.log("result on block submit", result);
       }
@@ -217,8 +217,8 @@ const Cameras = () => {
   const updateCameraStatus = async (payload: typeof formData) => {
     try {
       console.log("Updating NVR with full data:", payload);
-      const pay = { ...payload, id: payload.id };
-      const result = await CommonService.CommonPut(pay,`/CameraUpdate`);
+      // const pay = { ...payload, id: payload.id };
+      const result = await CommonService.CommonPut(payload,`/CameraUpdate`);
 
       if (result.Type=='S') {
         CommonHelper.SuccessToaster(
@@ -548,7 +548,7 @@ const Cameras = () => {
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        nvr_id: parseInt(e.target.value),
+                        nvr_id: e.target.value,
                       })
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
@@ -641,11 +641,11 @@ const Cameras = () => {
                     Location
                   </label>
                   <select
-                    value={formData.location_id}
+                    value={formData.section_id}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        location_id: parseInt(e.target.value),
+                        section_id: (e.target.value),
                       })
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
@@ -665,7 +665,7 @@ const Cameras = () => {
                     Installed Date
                   </label>
                   <Flatpickr
-                    value={formData.install_date}
+                    value={moment(formData.install_date).format("DD-MM-YYYY")}
                     options={{
                       dateFormat: "d-m-Y",
                       position: "auto left",
@@ -675,7 +675,7 @@ const Cameras = () => {
                       setFormData((prevData) => ({
                         ...prevData,
                         install_date: date[0]
-                          ? moment(date[0]).format("DD-MM-YYYY")
+                          ? moment(date[0]).format("YYYY-MM-DD")
                           : "",
                       }))
                     }

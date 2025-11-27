@@ -49,7 +49,7 @@ const Floors = () => {
         CommonService.GetAll("/FloorList"),
         CommonService.GetAll("/BlockList"),
       ]);
-      console.log("data from backend for floor block: ", floorData, blockData);
+      // console.log("data from backend for floor block: ", floorData, blockData);
 
       if (floorData.length > 0) {
         setFloors(floorData);
@@ -123,7 +123,7 @@ const Floors = () => {
         if (result.Type == "S") CommonHelper.SuccessToaster(result.Message);
       } else {
         result = await CommonService.CommonPost(
-          { ...formData, created_by_id: "1" },
+          { ...formData, created_by_id: "b5cec1c6-8783-4e60-b88b-d49d8ae658a7" },
           "/FloorInsert"
         );
         if (result.Type == "S") CommonHelper.SuccessToaster(result.Message);
