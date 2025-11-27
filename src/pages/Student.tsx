@@ -234,7 +234,13 @@ const Student = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Student Image
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Student Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Registration Number
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Room Number
@@ -252,6 +258,19 @@ const Student = () => {
                 <tr key={stu.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
+                      <img
+                      src={
+                        stu.student_image
+                          ? stu.student_image
+                          : noImage
+                      }
+                      alt="Profile"
+                      className="w-24 h-24 rounded-lg object-cover border-2 border-gray-300 shadow-lg"
+                    />
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
                       {/* <div className="flex-shrink-0 h-10 w-10">
                         <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
                           <span className="text-white font-medium">
@@ -266,6 +285,9 @@ const Student = () => {
                         {/* <div className="text-sm text-gray-500">{user.email}</div> */}
                       </div>
                     </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">{stu.register_number}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">{stu.room_no}</div>

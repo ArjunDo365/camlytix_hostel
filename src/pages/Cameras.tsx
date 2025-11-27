@@ -16,9 +16,9 @@ const Cameras = () => {
   const [editingCamera, setEditingCamera] = useState<Camera | null>(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    id: '',
-    section_id: '',
-    nvr_id: '',
+    id: "",
+    section_id: "",
+    nvr_id: "",
     asset_no: "",
     serial_number: "",
     model_name: "",
@@ -55,9 +55,9 @@ const Cameras = () => {
 
   const resetForm = () => {
     setFormData({
-      id: '',
-      section_id: '',
-      nvr_id: '',
+      id: "",
+      section_id: "",
+      nvr_id: "",
       asset_no: "",
       serial_number: "",
       model_name: "",
@@ -79,7 +79,12 @@ const Cameras = () => {
         CommonService.GetAll("/NvrList"),
         CommonService.GetAll("/SectionList"),
       ]);
-      console.log("data from backend for camera nvr section: ", cameraData,nvrData,sectionData);
+      console.log(
+        "data from backend for camera nvr section: ",
+        cameraData,
+        nvrData,
+        sectionData
+      );
 
       if (cameraData.length > 0) {
         setCameras(cameraData);
@@ -183,21 +188,24 @@ const Cameras = () => {
           return;
         }
         console.log("payload for block update: ", formData);
-        const pay = {...formData,id:editingCamera.id}
-        result = await CommonService.CommonPut(
-          pay,
-          `/CameraUpdate`
-        );
-        if (result.Type=='S') CommonHelper.SuccessToaster(result.Message);
+        const pay = { ...formData, id: editingCamera.id };
+        result = await CommonService.CommonPut(pay, `/CameraUpdate`);
+        if (result.Type == "S") CommonHelper.SuccessToaster(result.Message);
         console.log("result on edit block submit", result);
       } else {
         console.log("payload for block submit: ", formData);
-        result = await CommonService.CommonPost({...formData,created_by_id: "b5cec1c6-8783-4e60-b88b-d49d8ae658a7"}, "/CameraInsert");
-        if (result.Type=='S') CommonHelper.SuccessToaster(result.Message);
+        result = await CommonService.CommonPost(
+          {
+            ...formData,
+            created_by_id: "b5cec1c6-8783-4e60-b88b-d49d8ae658a7",
+          },
+          "/CameraInsert"
+        );
+        if (result.Type == "S") CommonHelper.SuccessToaster(result.Message);
         console.log("result on block submit", result);
       }
 
-      if (result && result.Type=='S') {
+      if (result && result.Type == "S") {
         await loadData();
         setShowModal(false);
         resetForm();
@@ -217,10 +225,23 @@ const Cameras = () => {
   const updateCameraStatus = async (payload: typeof formData) => {
     try {
       console.log("Updating NVR with full data:", payload);
-      // const pay = { ...payload, id: payload.id };
-      const result = await CommonService.CommonPut(payload,`/CameraUpdate`);
+      const pay = {
+        id: payload.id,
+        section_id: payload.section_id,
+        nvr_id: payload.nvr_id,
+        asset_no: payload.asset_no,
+        serial_number: payload.serial_number,
+        model_name: payload.model_name,
+        ip_address: payload.ip_address,
+        manufacturer: payload.manufacturer,
+        vendor: payload.vendor,
+        install_date: payload.install_date,
+        port: payload.port,
+        status: payload.status,
+      };
+      const result = await CommonService.CommonPut(pay, `/CameraUpdate`);
 
-      if (result.Type=='S') {
+      if (result.Type == "S") {
         CommonHelper.SuccessToaster(
           result.Message || "Status updated successfully"
         );
@@ -645,7 +666,7 @@ const Cameras = () => {
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        section_id: (e.target.value),
+                        section_id: e.target.value,
                       })
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"

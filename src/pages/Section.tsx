@@ -7,7 +7,7 @@ import { CommonService } from "../service/commonservice.page";
 
 const Section = () => {
   const [showModal, setShowModal] = useState(false);
-  const [sections, setSections] = useState<s[]>([]);
+  const [sections, setSections] = useState<any[]>([]);
   const [floors, setFloors] = useState<Floor[] | null>([]);
   const [blocks, setBlocks] = useState<Block[] | null>([]);
   const [editingSection, setEditingSection] = useState<s | null>(null);
@@ -219,7 +219,7 @@ const Section = () => {
                       </div> */}
                       <div className="">
                         <div className="text-sm font-medium text-gray-900">
-                          {section.name}
+                          {section?.name}
                         </div>
                         {/* <div className="text-sm text-gray-500">{user.email}</div> */}
                       </div>
@@ -231,7 +231,7 @@ const Section = () => {
                         ? 'bg-purple-100 text-purple-800'
                         : 'bg-green-100 text-green-800'
                     }`}> */}
-                    {section.floor_name}
+                    {section?.floor?.name}
                     {/* {floors?.find(f => f.id === section.floor_id)?.name || "Unknown"} */}
                     {/* </span> */}
                   </td>
@@ -241,7 +241,7 @@ const Section = () => {
                         ? 'bg-purple-100 text-purple-800'
                         : 'bg-green-100 text-green-800'
                     }`}> */}
-                    {section.block_name}
+                    {section?.block?.name}
                     {/* {floors?.find(f => f.id === section.floor_id)?.name || "Unknown"} */}
                     {/* </span> */}
                   </td>
@@ -287,7 +287,7 @@ const Section = () => {
                 </label>
                 <input
                   type="text"
-                  value={formData.name}
+                  value={formData?.name}
                   onChange={(e) =>
                     setFormData((prevData) => ({
                       ...prevData,

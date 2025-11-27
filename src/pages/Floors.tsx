@@ -7,9 +7,9 @@ import { CommonService } from "../service/commonservice.page";
 
 const Floors = () => {
   const [showModal, setShowModal] = useState(false);
-  const [floors, setFloors] = useState<Floor[]>([]);
+  const [floors, setFloors] = useState<any[]>([]);
   const [blocks, setBlocks] = useState<Block[]>([]);
-  const [editingFloor, setEditingFloor] = useState<Floor | null>(null);
+  const [editingFloor, setEditingFloor] = useState<Floor | null>(null); 
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
@@ -25,7 +25,7 @@ const Floors = () => {
     return (
       floor.name?.toLowerCase().includes(text) ||
       floor.description?.toLowerCase().includes(text) ||
-      floor.block_name?.toLowerCase().includes(text)
+      floor.block.name?.toLowerCase().includes(text)
     );
   });
 
@@ -230,7 +230,7 @@ const Floors = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {floor.block_name}
+                    {floor?.block?.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center gap-3">

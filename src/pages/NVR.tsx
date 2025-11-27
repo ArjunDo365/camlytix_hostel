@@ -72,18 +72,15 @@ const NVR = () => {
         CommonService.GetAll("/NvrList"),
         CommonService.GetAll("/SectionList"),
       ]);
-      console.log("data from backend for nvr,section: ", nvrData,sectionData);
+      console.log("data from backend for nvr,section: ", nvrData, sectionData);
 
       if (nvrData.length > 0) {
         setNvrs(nvrData);
-      } 
-      else setNvrs([]);
+      } else setNvrs([]);
 
       if (sectionData.length > 0) {
         setFloors(sectionData);
-      } 
-      else setFloors([]);
-
+      } else setFloors([]);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -169,7 +166,10 @@ const NVR = () => {
       } else {
         // console.log("payload for block submit: ", formData);
         result = await CommonService.CommonPost(
-          { ...formData, created_by_id: "b5cec1c6-8783-4e60-b88b-d49d8ae658a7" },
+          {
+            ...formData,
+            created_by_id: "b5cec1c6-8783-4e60-b88b-d49d8ae658a7",
+          },
           "/NvrInsert"
         );
         if (result.Type == "S") CommonHelper.SuccessToaster(result.Message);
@@ -194,8 +194,21 @@ const NVR = () => {
   const updateNvrStatus = async (payload: typeof formData) => {
     try {
       console.log("Updating NVR with full data:", payload);
-      // const pay = {...payload,id:}
-      const result = await CommonService.CommonPut(payload, `/NvrUpdate`);
+
+      const pay = {
+        id: payload.id,
+        section_id: payload.section_id,
+        asset_no: payload.asset_no,
+        serial_number: payload.serial_number,
+        model_name: payload.model_name,
+        ip_address: payload.ip_address,
+        manufacturer: payload.manufacturer,
+        vendor: payload.vendor,
+        install_date: payload.install_date,
+        status: payload.status,
+      };
+
+      const result = await CommonService.CommonPut(pay, `/NvrUpdate`);
 
       if (result.Type == "S") {
         CommonHelper.SuccessToaster(
