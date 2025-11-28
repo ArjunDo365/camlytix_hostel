@@ -8,7 +8,7 @@ import { CommonService } from "../service/commonservice.page";
 const Section = () => {
   const [showModal, setShowModal] = useState(false);
   const [sections, setSections] = useState<any[]>([]);
-  const [floors, setFloors] = useState<Floor[] | null>([]);
+  const [floors, setFloors] = useState<any[] | null>([]);
   const [blocks, setBlocks] = useState<Block[] | null>([]);
   const [editingSection, setEditingSection] = useState<s | null>(null);
   const [loading, setLoading] = useState(true);
@@ -241,7 +241,7 @@ const Section = () => {
                         ? 'bg-purple-100 text-purple-800'
                         : 'bg-green-100 text-green-800'
                     }`}> */}
-                    {section?.block?.name}
+                    {section?.floor.block?.name}
                     {/* {floors?.find(f => f.id === section.floor_id)?.name || "Unknown"} */}
                     {/* </span> */}
                   </td>
@@ -334,7 +334,7 @@ const Section = () => {
                   </option>
                   {floors?.map((floor) => (
                     <option key={floor.id} value={floor.id}>
-                      {floor.block_name} &gt; {floor.name}
+                      {floor.block.name} &gt; {floor.name}
                     </option>
                   ))}
                 </select>

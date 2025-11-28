@@ -10,7 +10,7 @@ import { CommonService } from "../service/commonservice.page";
 
 const NVR = () => {
   const [showModal, setShowModal] = useState(false);
-  const [nvrs, setNvrs] = useState<Nvr[]>([]);
+  const [nvrs, setNvrs] = useState<any[]>([]);
   const [floors, setFloors] = useState<Section[]>([]);
   const [editingNvr, setEditingNvr] = useState<Nvr | null>(null);
   const [loading, setLoading] = useState(false);
@@ -325,7 +325,7 @@ const NVR = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">
-                      {n.block_name} &gt; {n.floor_name} &gt; {n.location_name}
+                      {n?.floor?.block?.name} &gt; {n?.floor?.name} &gt; {n?.section?.name}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

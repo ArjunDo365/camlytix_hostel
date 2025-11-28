@@ -53,11 +53,15 @@ const NewLogin = () => {
     let res = await CommonService.CommonPost(UserData, "/UserLogin");
     if (res.Type == "S") {
       CommonHelper.SuccessToaster(res.Message);
+      // console.log('res after login: ',res);
       let LocalData: any = {};
-      LocalData = jwtDecode(res?.result?.api_token ?? "");
-      const data = { ...LocalData, ...res?.result, Ip: res?.Ip };
+      // LocalData = jwtDecode(res?.AdditionalData.User.api_token ?? "");
+      // LocalData = res?.AdditionalData.User.api_token ?? "";
+      // console.log('local data : ',LocalData);
+      const data = {...res?.AdditionalData.User };
+      // console.log('data to ls: ',data);
       CommonHelper.SetLocalStorage(CommonHelper.UserStorageName, data, true);
-      navigate("/block");
+      navigate("/dashboard");
       CommonHelper.Hidespinner();
     } else {
       CommonHelper.ErrorToaster(res.Message);
@@ -81,8 +85,8 @@ const NewLogin = () => {
       <div className="w-full lg:w-1/2 h-full bg-black text-white flex p-6 lg:p-8 flex-col items-center justify-center">
         <img
           src={logo}
-          alt="logo of saivas portal"
-          className="w-[160px] h-[60px] mb-6 lg:w-[200px] lg:h-[75px]"
+          alt="logo of camlytix hostel portal"
+          className="w-[160px] mb-6 lg:w-[240px] object-contain"
         />
         {/* <div className="dropdown">
           <Dropdown

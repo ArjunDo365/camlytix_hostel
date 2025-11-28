@@ -10,7 +10,7 @@ import { CommonService } from "../service/commonservice.page";
 
 const Cameras = () => {
   const [showModal, setShowModal] = useState(false);
-  const [cameras, setCameras] = useState<Camera[]>([]);
+  const [cameras, setCameras] = useState<any[]>([]);
   const [nvrs, setNvrs] = useState<Nvr[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
   const [editingCamera, setEditingCamera] = useState<Camera | null>(null);
@@ -355,7 +355,7 @@ const Cameras = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">
-                      {n.block_name} &gt; {n.floor_name} &gt; {n.location_name}
+                      {n?.block?.name} &gt; {n.floor?.name} &gt; {n.section.name}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

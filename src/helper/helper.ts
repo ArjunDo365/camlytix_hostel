@@ -104,7 +104,7 @@ export abstract class CommonHelper {
 
   // Localstorage
   static UserData: any;
-  static UserStorageName: string = "forum";
+  static UserStorageName: string = "camlytix_hostel";
   public static SetUserData(
     name: string,
     value: any,
@@ -152,8 +152,10 @@ export abstract class CommonHelper {
 
   public static GetLocalStorage(name: string, JsonFormat: boolean = true) {
     if (JsonFormat) {
+      console.log('from helper: ',localStorage.getItem(name));
       return JSON.parse(localStorage.getItem(name) ?? "{}");
     } else {
+      console.log('from helper: ',localStorage.getItem(name))
       return localStorage.getItem(name) ?? "";
     }
   }
