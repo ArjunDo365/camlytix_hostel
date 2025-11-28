@@ -79,22 +79,22 @@ const Cameras = () => {
         CommonService.GetAll("/NvrList"),
         CommonService.GetAll("/SectionList"),
       ]);
-      console.log(
-        "data from backend for camera nvr section: ",
-        cameraData,
-        nvrData,
-        sectionData
-      );
+      // console.log(
+      //   "data from backend for camera nvr section: ",
+      //   cameraData,
+      //   nvrData,
+      //   sectionData
+      // );
 
       if (cameraData.length > 0) {
         setCameras(cameraData);
-      }
+      } else setCameras([]);
       if (nvrData.length > 0) {
         setNvrs(nvrData);
-      }
+      } else setNvrs([]);
       if (sectionData.length > 0) {
         setSections(sectionData);
-      }
+      } else setSections([]);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -187,13 +187,13 @@ const Cameras = () => {
           CommonHelper.ErrorToaster("Invalid camera id");
           return;
         }
-        console.log("payload for block update: ", formData);
+        // console.log("payload for block update: ", formData);
         const pay = { ...formData, id: editingCamera.id };
         result = await CommonService.CommonPut(pay, `/CameraUpdate`);
         if (result.Type == "S") CommonHelper.SuccessToaster(result.Message);
-        console.log("result on edit block submit", result);
+        // console.log("result on edit block submit", result);
       } else {
-        console.log("payload for block submit: ", formData);
+        // console.log("payload for block submit: ", formData);
         result = await CommonService.CommonPost(
           {
             ...formData,
@@ -202,7 +202,7 @@ const Cameras = () => {
           "/CameraInsert"
         );
         if (result.Type == "S") CommonHelper.SuccessToaster(result.Message);
-        console.log("result on block submit", result);
+        // console.log("result on block submit", result);
       }
 
       if (result && result.Type == "S") {
@@ -224,7 +224,7 @@ const Cameras = () => {
 
   const updateCameraStatus = async (payload: typeof formData) => {
     try {
-      console.log("Updating NVR with full data:", payload);
+      // console.log("Updating NVR with full data:", payload);
       const pay = {
         id: payload.id,
         section_id: payload.section_id,
@@ -355,7 +355,8 @@ const Cameras = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">
-                      {n?.block?.name} &gt; {n.floor?.name} &gt; {n.section.name}
+                      {n?.block?.name} &gt; {n.floor?.name} &gt;{" "}
+                      {n.section.name}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -644,10 +645,10 @@ const Cameras = () => {
                           ...prevData,
                           port: parseInt(val),
                         }));
-                        console.log(
-                          "checking on change value: ",
-                          parseInt(val)
-                        );
+                        // console.log(
+                        //   "checking on change value: ",
+                        //   parseInt(val)
+                        // );
                       }
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"

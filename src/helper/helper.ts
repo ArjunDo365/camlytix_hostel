@@ -152,10 +152,10 @@ export abstract class CommonHelper {
 
   public static GetLocalStorage(name: string, JsonFormat: boolean = true) {
     if (JsonFormat) {
-      console.log('from helper: ',localStorage.getItem(name));
+      // console.log('from helper: ',localStorage.getItem(name));
       return JSON.parse(localStorage.getItem(name) ?? "{}");
     } else {
-      console.log('from helper: ',localStorage.getItem(name))
+      // console.log('from helper: ',localStorage.getItem(name))
       return localStorage.getItem(name) ?? "";
     }
   }

@@ -86,7 +86,7 @@ const NewLogin = () => {
         <img
           src={logo}
           alt="logo of camlytix hostel portal"
-          className="w-[160px] mb-6 lg:w-[240px] object-contain"
+          className="w-[160px] mb-6 lg:w-[300px] object-contain"
         />
         {/* <div className="dropdown">
           <Dropdown
@@ -140,7 +140,7 @@ const NewLogin = () => {
           </Dropdown>
         </div> */}
         <div className="flex p-4 lg:p-8 flex-col items-center w-full lg:w-[80%]">
-          <h1 className="text-[20px] lg:text-3xl font-bold uppercase !leading-snug text-white mb-4 text-center">
+          <h1 className="text-[22px] font-bold uppercase !leading-snug text-white mb-4 text-center">
             {t("Sign In To Camlytix")}
           </h1>
 

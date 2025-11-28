@@ -72,7 +72,7 @@ const NVR = () => {
         CommonService.GetAll("/NvrList"),
         CommonService.GetAll("/SectionList"),
       ]);
-      console.log("data from backend for nvr,section: ", nvrData, sectionData);
+      // console.log("data from backend for nvr,section: ", nvrData, sectionData);
 
       if (nvrData.length > 0) {
         setNvrs(nvrData);
@@ -173,7 +173,7 @@ const NVR = () => {
           "/NvrInsert"
         );
         if (result.Type == "S") CommonHelper.SuccessToaster(result.Message);
-        console.log("result on block submit", result);
+        // console.log("result on block submit", result);
       }
 
       if (result.Type == "S") {
@@ -193,7 +193,7 @@ const NVR = () => {
 
   const updateNvrStatus = async (payload: typeof formData) => {
     try {
-      console.log("Updating NVR with full data:", payload);
+      // console.log("Updating NVR with full data:", payload);
 
       const pay = {
         id: payload.id,

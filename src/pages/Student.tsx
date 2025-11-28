@@ -125,7 +125,7 @@ const Student = () => {
     }
 
     try {
-      console.log("payload for block api: ", editingStudent, formData);
+      // console.log("payload for block api: ", editingStudent, formData);
       let result;
       if (editingStudent) {
         const pay = { ...formData, id: editingStudent.id };
