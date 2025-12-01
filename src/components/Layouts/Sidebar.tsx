@@ -33,6 +33,7 @@ import IconMenuAuthentication from "../Icon/Menu/IconMenuAuthentication";
 import IconMenuDocumentation from "../Icon/Menu/IconMenuDocumentation";
 import {
   AlignVerticalJustifyEnd,
+  BookUser,
   Building2,
   Cctv,
   LayoutDashboard,
@@ -186,6 +187,16 @@ const Sidebar = () => {
                     <User className="group-hover:!text-primary shrink-0" />
                     <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
                       Student
+                    </span>
+                  </div>
+                </NavLink>
+              </li>
+              <li className="menu nav-item">
+                <NavLink to="/attendance" className="nav-link group">
+                  <div className="flex items-center">
+                    <BookUser className="group-hover:!text-primary shrink-0" />
+                    <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                      Attendance Details
                     </span>
                   </div>
                 </NavLink>

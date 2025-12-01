@@ -9,6 +9,7 @@ import Student from "../pages/Student";
 import NewLogin from "../pages/NewLogin";
 import Dashboard from "../pages/Dashboard";
 import ProtectedRoute from "../pages/ProtectedRoute";
+import AttendanceDetails from "../pages/AttendanceDetails";
 const Index = lazy(() => import("../pages/Index"));
 
 const routes = [
@@ -86,6 +87,14 @@ const routes = [
     element: (
       <ProtectedRoute>
         <Student />
+      </ProtectedRoute>
+    ),
+    layout: "default",
+  },{
+    path: "/attendance",
+    element: (
+      <ProtectedRoute>
+        <AttendanceDetails />
       </ProtectedRoute>
     ),
     layout: "default",
