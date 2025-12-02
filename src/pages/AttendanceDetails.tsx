@@ -285,7 +285,7 @@ const AttendanceDetails = () => {
           <input
             type="text"
             className="form-input w-auto"
-            placeholder="Search..."
+            placeholder="Search student name..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />

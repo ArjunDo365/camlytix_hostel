@@ -73,6 +73,7 @@ const Header = () => {
       : false;
 
   const themeConfig = useSelector((state: IRootState) => state.themeConfig);
+  const dark_theme = themeConfig.isDarkMode;
   const dispatch = useDispatch();
 
   function createMarkup(messages: any) {
@@ -176,7 +177,7 @@ const Header = () => {
             <Link to="/" className="main-logo flex items-center shrink-0">
               <img
                 className="w-11-5 ltr:-ml-1 rtl:-mr-1 inline"
-                src="/assets/images/logo.png"
+                src={dark_theme ? "/assets/images/logo.png" : "/assets/images/logo_2.png"}
                 alt="logo"
               />
               {/* <span className="text-2xl ltr:ml-1.5 rtl:mr-1.5  font-semibold  align-middle hidden md:inline dark:text-white-light transition-all duration-300">VRISTO</span> */}

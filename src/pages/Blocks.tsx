@@ -152,7 +152,7 @@ const Blocks = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Block Master</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Block Details</h2>
           <p className="text-gray-600">Manage Blocks in the hostel</p>
         </div>
 

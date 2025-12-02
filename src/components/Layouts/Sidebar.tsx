@@ -52,6 +52,7 @@ const Sidebar = () => {
   const semidark = useSelector(
     (state: IRootState) => state.themeConfig.semidark
   );
+  const dark_theme = themeConfig.isDarkMode;
   const location = useLocation();
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -88,6 +89,7 @@ const Sidebar = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location]);
 
+  // console.log('themeConfig: ',themeConfig);
   return (
     <div className={semidark ? "dark" : ""}>
       <nav
@@ -100,7 +102,7 @@ const Sidebar = () => {
             <NavLink to="/" className="main-logo flex items-center shrink-0">
               <img
                 className="w-11-5 ml-[5px] flex-none"
-                src="/assets/images/logo.png"
+                src={dark_theme ? "/assets/images/logo.png" : "/assets/images/logo_2.png"}
                 alt="logo"
               />
               {/* <span className="text-2xl ltr:ml-1.5 rtl:mr-1.5 font-semibold align-middle lg:inline dark:text-white-light">{t('VRISTO')}</span> */}

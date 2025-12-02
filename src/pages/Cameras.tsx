@@ -269,7 +269,7 @@ const Cameras = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Camera Master</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Camera Details</h2>
           <p className="text-gray-600">Manage Cameras in the hostel</p>
         </div>
         <div className="flex gap-2">
