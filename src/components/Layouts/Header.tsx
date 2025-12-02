@@ -169,7 +169,7 @@ const Header = () => {
     <header
       className={`${
         themeConfig.semidark && themeConfig.menu === "horizontal" ? "dark" : ""
-      }`}
+      } !z-0`}
     >
       <div className="shadow-sm">
         <div className="relative bg-white flex w-full items-center px-5 py-2.5 dark:bg-black">

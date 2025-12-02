@@ -15,19 +15,15 @@ import Select from "react-select";
 import { Download, ListFilterPlus } from "lucide-react";
 import moment from "moment";
 import { CommonHelper } from "../helper/helper";
+import { CommonService } from "../service/commonservice.page";
 
-const studentsData = [
-  { id: 1, name: "John Doe", registration_number: "REG001" },
-  { id: 2, name: "Jane Smith", registration_number: "REG002" },
-  { id: 3, name: "Mike Johnson", registration_number: "REG003" },
-  { id: 4, name: "Sarah Williams", registration_number: "REG004" },
-];
-
-const col = ["id", "name", "registration_number"];
+const col = ["student_no", "student_name", "date","time_out","time_in"];
 
 const AttendanceDetails = () => {
   const [searchText, setSearchText] = useState("");
-  const [students, setStudents] = useState<any[]>(studentsData);
+  const [students, setStudents] = useState<any[]>([]);
+  const [attList, setAttList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [dateRange, setDateRange] = useState([
@@ -38,21 +34,32 @@ const AttendanceDetails = () => {
     },
   ]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(3);
+  const [itemsPerPage] = useState(10);
 
-  const filterData = students?.filter((st: any) => {
-    const text = searchText?.toLowerCase();
-    return st.name?.toLowerCase().includes(text);
-  });
-
-  const totalPages = Math.ceil(filterData.length / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filterData.slice(indexOfFirstItem, indexOfLastItem);
+  useEffect(() => {
+    loadData();
+    function handleClickOutside(event) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [searchText]);
+
+  const filterData = attList?.filter((st: any) => {
+    const text = searchText?.toLowerCase();
+    return st.student_name?.toLowerCase().includes(text);
+  });
+  // console.log("checking filter data: ", filterData);
+  const totalPages = Math.ceil(filterData.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filterData.slice(indexOfFirstItem, indexOfLastItem);
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -70,23 +77,20 @@ const AttendanceDetails = () => {
     }
   };
 
-  // Generate page numbers to display
   const getPageNumbers = () => {
     const pages: number[] = [];
     const maxPagesToShow = 5;
 
     if (totalPages <= maxPagesToShow) {
-      // Show all pages if total pages are less than max
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Show pages with ellipsis
       if (currentPage <= 3) {
         for (let i = 1; i <= 4; i++) {
           pages.push(i);
         }
-        pages.push(-1); // -1 represents ellipsis
+        pages.push(-1);
         pages.push(totalPages);
       } else if (currentPage >= totalPages - 2) {
         pages.push(1);
@@ -110,25 +114,15 @@ const AttendanceDetails = () => {
 
   const wrapperRef = useRef(null);
 
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   const options = students.map((student) => ({
     value: student.id,
-    label: `${student.name} (${student.registration_number})`,
+    label: `${student.name} (${student.register_number})`,
     student: student,
   }));
 
   const handleChange = (selectedOption) => {
     setSelectedStudent(selectedOption);
-    console.log("Selected student:", selectedOption?.student);
+    // console.log("Selected student:", selectedOption?.student);
   };
 
   const staticRanges = [
@@ -196,26 +190,54 @@ const AttendanceDetails = () => {
     return `${start} - ${end}`;
   };
 
-  const handleSubmit = () => {
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const stuData = await CommonService.GetAll("/StudentList");
+
+      // console.log("data from backend for blocks: ", blockData);
+
+      if (stuData.length > 0) {
+        setStudents(stuData);
+      } else setStudents([]);
+    } catch (error) {
+      console.error("Error loading data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async () => {
     if (!dateRange[0].startDate) {
       CommonHelper.ErrorToaster("Enter Start Date");
       return;
     } else if (!dateRange[0].endDate) {
       CommonHelper.ErrorToaster("Enter End Date");
       return;
-    } else if (!selectedStudent?.student?.registration_number) {
+    } else if (!selectedStudent?.student?.register_number) {
       CommonHelper.ErrorToaster("Select student");
       return;
     }
+    try {
+      setLoading(true);
 
-    const payload = {
-      start_data: moment(dateRange[0].startDate).format("YYYY-MM-DD"),
-      end_date: moment(dateRange[0].endDate).format("YYYY-MM-DD"),
-      registration_number: selectedStudent.student.registration_number,
-    };
-    console.log("api payload: ", payload);
+      const start_data = moment(dateRange[0].startDate).format("YYYY-MM-DD");
+      const end_date = moment(dateRange[0].endDate).format("YYYY-MM-DD");
+      const id = selectedStudent.student.id;
+
+      const attData = await CommonService.GetAll(
+        `/AttendanceList/${start_data}/${end_date}/${id}`
+      );
+      console.log("att details: ", attData);
+      setAttList(attData);
+      setSearchText('');
+    } catch (error) {
+      console.error("Error loading data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
-
+  // console.log('att list state: ',attList);
   const capitalize = (text: any) => {
     return text
       .replace("_", " ")
@@ -270,6 +292,16 @@ const AttendanceDetails = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="p-6">
@@ -282,16 +314,17 @@ const AttendanceDetails = () => {
           </p>
         </div>
         <div className="ltr:ml-auto rtl:mr-auto mb-6 flex items-center justify-between">
-          <input
+          {/* <input
             type="text"
             className="form-input w-auto"
             placeholder="Search student name..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-          />
+          /> */}
           <button
             onClick={exportTable}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:bg-gray-400 disabled:text-gray-200 disabled:cursor-not-allowed"
+            disabled={attList.length == 0}
           >
             <Download size={20} />
             Download Data
@@ -391,6 +424,9 @@ const AttendanceDetails = () => {
                     Registration Number
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Check-Out Time
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -402,8 +438,8 @@ const AttendanceDetails = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {currentItems?.map((stu) => (
-                  <tr key={stu.id} className="hover:bg-gray-50">
+                {currentItems?.map((stu,index) => (
+                  <tr key={index} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <img
@@ -424,7 +460,7 @@ const AttendanceDetails = () => {
                       </div> */}
                         <div className="">
                           <div className="text-sm font-medium text-gray-900">
-                            {stu.name}
+                            {stu.student_name}
                           </div>
                           {/* <div className="text-sm text-gray-500">{user.email}</div> */}
                         </div>
@@ -432,17 +468,22 @@ const AttendanceDetails = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
-                        {stu.registration_number}
+                        {stu.student_no}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
-                        {stu.check_out ?? "--"}
+                        {moment(stu.date).format('DD-MM-YYYY')}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
-                        {stu.check_in ?? "--"}
+                        {stu.time_out ?? "--"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">
+                        {stu.time_in ?? "--"}
                       </div>
                     </td>
                     {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

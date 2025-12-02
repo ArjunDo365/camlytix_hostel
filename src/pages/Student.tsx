@@ -27,6 +27,8 @@ const Student = () => {
 
   const [searchText, setSearchText] = useState("");
   const [error, setError] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   const handleMobileNumberChange = (e) => {
     const value = e.target.value.replace(/\D/g, "");
@@ -45,6 +47,66 @@ const Student = () => {
     return st.name?.toLowerCase().includes(text);
   });
 
+  const totalPages = Math.ceil(filterData.length / itemsPerPage);
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filterData.slice(indexOfFirstItem, indexOfLastItem);
+  
+    useEffect(() => {
+      setCurrentPage(1);
+    }, [searchText]);
+  
+    const handlePageChange = (pageNumber: number) => {
+      setCurrentPage(pageNumber);
+    };
+  
+    const handlePrevPage = () => {
+      if (currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      }
+    };
+  
+    const handleNextPage = () => {
+      if (currentPage < totalPages) {
+        setCurrentPage(currentPage + 1);
+      }
+    };
+  
+    const getPageNumbers = () => {
+      const pages: number[] = [];
+      const maxPagesToShow = 5;
+  
+      if (totalPages <= maxPagesToShow) {
+        for (let i = 1; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        if (currentPage <= 3) {
+          for (let i = 1; i <= 4; i++) {
+            pages.push(i);
+          }
+          pages.push(-1);
+          pages.push(totalPages);
+        } else if (currentPage >= totalPages - 2) {
+          pages.push(1);
+          pages.push(-1);
+          for (let i = totalPages - 3; i <= totalPages; i++) {
+            pages.push(i);
+          }
+        } else {
+          pages.push(1);
+          pages.push(-1);
+          for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+            pages.push(i);
+          }
+          pages.push(-1);
+          pages.push(totalPages);
+        }
+      }
+  
+      return pages;
+    };
+    
   useEffect(() => {
     loadData();
   }, []);
@@ -257,7 +319,7 @@ const Student = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filterData?.map((stu) => (
+              {currentItems?.map((stu) => (
                 <tr key={stu.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -317,6 +379,66 @@ const Student = () => {
             </tbody>
           </table>
         </div>
+        {filterData.length > 0 && (
+            <div className="flex items-center justify-between m-3 px-4">
+              <div className="text-sm text-gray-700">
+                Showing {indexOfFirstItem + 1} to{" "}
+                {Math.min(indexOfLastItem, filterData.length)} of{" "}
+                {filterData.length} entries
+              </div>
+              <ul className="inline-flex items-center gap-1">
+                <li>
+                  <button
+                    type="button"
+                    onClick={handlePrevPage}
+                    disabled={currentPage === 1}
+                    className={`flex justify-center font-semibold px-3.5 py-2 rounded transition border-2 ${
+                      currentPage === 1
+                        ? "text-gray-400 border-gray-200 cursor-not-allowed"
+                        : "text-dark hover:text-primary border-white-light dark:border-[#191e3a] hover:border-primary dark:hover:border-primary dark:text-white-light"
+                    }`}
+                  >
+                    Prev
+                  </button>
+                </li>
+                {getPageNumbers().map((pageNum, index) => (
+                  <li key={index}>
+                    {pageNum === -1 ? (
+                      <span className="flex justify-center px-3.5 py-2">
+                        ...
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handlePageChange(pageNum)}
+                        className={`flex justify-center font-semibold px-3.5 py-2 rounded transition border-2 ${
+                          currentPage === pageNum
+                            ? "text-primary border-primary dark:border-primary dark:text-white-light"
+                            : "text-dark hover:text-primary border-white-light dark:border-[#191e3a] hover:border-primary dark:hover:border-primary dark:text-white-light"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    )}
+                  </li>
+                ))}
+                <li>
+                  <button
+                    type="button"
+                    onClick={handleNextPage}
+                    disabled={currentPage === totalPages}
+                    className={`flex justify-center font-semibold px-3.5 py-2 rounded transition border-2 ${
+                      currentPage === totalPages
+                        ? "text-gray-400 border-gray-200 cursor-not-allowed"
+                        : "text-dark hover:text-primary border-white-light dark:border-[#191e3a] hover:border-primary dark:hover:border-primary dark:text-white-light"
+                    }`}
+                  >
+                    Next
+                  </button>
+                </li>
+              </ul>
+            </div>
+          )}
       </div>
 
       {/* Modal */}

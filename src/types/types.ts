@@ -62,6 +62,8 @@ export interface Camera {
   last_working_on?: string;
   is_working?: any;
   status: number;
+  type?:string;
+  model?:string;
 }
 
 export interface AppSetting {

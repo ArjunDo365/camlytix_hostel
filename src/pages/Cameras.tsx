@@ -28,6 +28,7 @@ const Cameras = () => {
     vendor: "",
     install_date: moment().format("DD-MM-YYYY"),
     status: 0,
+    type: ""    
   });
   const [errors, setErrors] = useState({
     ip_address: "",
@@ -67,6 +68,7 @@ const Cameras = () => {
       vendor: "",
       install_date: moment().format("DD-MM-YYYY"),
       status: 0,
+      type: ""
     });
     setEditingCamera(null);
   };
@@ -117,6 +119,7 @@ const Cameras = () => {
       install_date: cam.install_date,
       port: cam.port,
       status: cam.status,
+      type: cam.type
     });
     setShowModal(true);
   };
@@ -474,7 +477,7 @@ const Cameras = () => {
               </h3>
             </div>
             <form onSubmit={handleSubmit} className="p-6">
-              <div className="grid xl:grid-cols-2 gap-6">
+              <div className="grid xl:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Asset Number
@@ -658,6 +661,47 @@ const Cameras = () => {
                     <p className="text-red-500 text-sm mt-1">{errors.port}</p>
                   )}
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Camera Type
+                  </label>
+                  <select
+                    value={formData.type}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        type: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    required
+                  >
+                    <option value={0}>-- Select Type --</option>
+                    <option key="in" value="in">
+                      IN
+                    </option>
+                    <option key="out" value="out">
+                      OUT
+                    </option>
+                  </select>
+                </div>
+                {/* <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Model
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.model}
+                    onChange={(e) =>
+                      setFormData((prevData) => ({
+                        ...prevData,
+                        model: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    required
+                  />
+                </div> */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Location
