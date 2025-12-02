@@ -16,6 +16,8 @@ import { CommonHelper } from "../helper/helper";
 import { CommonService } from "../service/commonservice.page";
 import { Tab } from "@headlessui/react";
 import ReactApexChart from "react-apexcharts";
+import noImage from "../../public/assets/images/noImg.png";
+
 
 const Dashboard = () => {
   const [showModal, setShowModal] = useState(false);
@@ -23,12 +25,15 @@ const Dashboard = () => {
   const [inactivelist, setInactivelist] = useState([]);
   // const [Dashboard, setDashboard] = useState([]);
   const [Dashboard, setDashboard] = useState<any>({});
-
+    const [lastUpdate, setLastUpdate] = useState("");
   const [GirlStatus, setGirlStatus] = useState<any>({
     series: [],
     options: {},
   });
   const [BoyStatus, setBoyStatus] = useState<any>({ series: [], options: {} });
+  const [maleInfo, setMaleInfo] = useState(null);
+  const [femaleInfo, setFemaleInfo] = useState(null);
+
   const [last10Boys, setLast10Boys] = useState<any[]>([]);
   const [Last10Girls, setLast10Girls] = useState<any[]>([]);
   const [searchText, setSearchText] = useState("");
@@ -38,9 +43,9 @@ const Dashboard = () => {
     const text = searchText.toLowerCase();
 
     return (
-      Boy.asset_no?.toLowerCase().includes(text) ||
-      Boy.model_name?.toLowerCase().includes(text) ||
-      Boy.ip_address?.toLowerCase().includes(text) ||
+      Boy.id?.toLowerCase().includes(text) ||
+      Boy.register_number?.toLowerCase().includes(text) ||
+      Boy.name?.toLowerCase().includes(text) ||
       Boy.location_name?.toLowerCase().includes(text) ||
       Boy.floor_name?.toLowerCase().includes(text) ||
       Boy.block_name?.toLowerCase().includes(text)
@@ -51,9 +56,9 @@ const Dashboard = () => {
     const text = GirlSearchText.toLowerCase();
 
     return (
-      cam.asset_no?.toLowerCase().includes(text) ||
-      cam.model_name?.toLowerCase().includes(text) ||
-      cam.ip_address?.toLowerCase().includes(text) ||
+      cam.id?.toLowerCase().includes(text) ||
+      cam.register_number?.toLowerCase().includes(text) ||
+      cam.name?.toLowerCase().includes(text) ||
       cam.location_name?.toLowerCase().includes(text) ||
       cam.floor_name?.toLowerCase().includes(text) ||
       cam.block_name?.toLowerCase().includes(text)
@@ -61,8 +66,25 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
+     const now = new Date();
+
+    // Format: DD-MMM-YYYY HH:mm
+    const formatted =
+      now.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      }).replace(/ /g, "-") +
+      " " +
+      now.toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      });
+
+    setLastUpdate(formatted);
     loadData();
-    dashboardGirlandBoy();
+    dashboardGirlandBoy('male');
   }, []);
 
   const InactiveList = async (data: any) => {
@@ -95,114 +117,98 @@ const Dashboard = () => {
     setLoading(false);
   };
 
-  const dashboardGirlandBoy = async () => {
-    try {
-      setLoading(true);
+ const dashboardGirlandBoy = async (gender) => {
+  try {
+    setLoading(true);
 
-      // const FullDashboadData = await window.electronAPI.getGirlsAndBoys();
-      const FullDashboadData = await CommonService.GetAll("/BlockList");
+       const FullDashboadData = await CommonService.GetAll(`/DashBoardStudentList/${gender}`);
 
-      if (FullDashboadData.success) {
-        // ⬅️ Store last10Boys data in state
-        setLast10Girls(FullDashboadData.data.Girls);
 
-        // ⬅️ Store last10Girls data in state
-        setLast10Boys(FullDashboadData.data.Boys);
+    // if (FullDashboadData.success) {
+      const list = FullDashboadData; // full array
+
+      const filtered = list.filter(item => item.gender === gender);
+
+      if (gender === "male") {
+        setLast10Boys(filtered);
+      } else if (gender === "female") {
+        setLast10Girls(filtered);
       }
+    // }
 
-      setLoading(false);
-    } catch (error) {
-      console.error("Error loading data:", error);
-    }
-  };
+    setLoading(false);
+  } catch (error) {
+    console.error("Error loading data:", error);
+  }
+};
+
+
 
   const loadData = async () => {
     try {
       setLoading(true);
-      // const DashboardData = await window.electronAPI.BoyGirlsummary();
-      const DashboardData = await CommonService.GetAll("/BlockList");
-      // console.log("data from backend for Dashboard: ", DashboardData);
 
-      if (DashboardData.success) {
-        setDashboard(DashboardData.data);
+      const DashboardData = await CommonService.GetAll(
+        "/DashBoardStudentChartList"
+      );
 
-        const d = DashboardData.data;
+      const dataArray = DashboardData;
+      setDashboard(dataArray);
 
-        // Boy DONUT CHART (Same style as Boy chart)
-        setBoyStatus({
-          series: [Number(d.active_Boys), Number(d.inactive_Boys)],
+      const maleData = dataArray.find((x) => x.gender === "male");
+      const femaleData = dataArray.find((x) => x.gender === "female");
 
-          options: {
-            chart: {
-              type: "pie",
-              height: 380,
-              foreColor: "#000",
-            },
-
-            title: {
-              text: `Total : ${d.total_Boys}`,
-              align: "center",
-              style: {
-                fontSize: "20px",
-                fontWeight: 600,
-                color: "#000",
-              },
-            },
-
-            labels: ["Working ", "Not Working "],
-
-            colors: ["#5d965d", "#ec6871"],
-
-            legend: {
-              position: "bottom",
-            },
-
-            dataLabels: {
-              enabled: true,
-              formatter: (val: number) => `${val.toFixed(1)}%`,
-            },
+      // BOY CHART
+      setBoyStatus({
+        series: [
+          Number(maleData?.time_in ?? 0),
+          Number(maleData?.time_out ?? 0),
+        ],
+        options: {
+          chart: { type: "pie", height: 380, foreColor: "#000" },
+          title: {
+            text: `Total : ${
+              Number(maleData?.time_in ?? 0) + Number(maleData?.time_out ?? 0)
+            }`,
+            align: "center",
           },
-        });
-
-        // Girl DONUT CHART (Same style as Girl chart)
-        setGirlStatus({
-          series: [Number(d.active_Girls), Number(d.inactive_Girls)],
-
-          options: {
-            chart: {
-              type: "pie",
-              height: 380,
-              foreColor: "#000",
-            },
-
-            title: {
-              text: `Total : ${d.total_Girls}`,
-              align: "center",
-              style: {
-                fontSize: "20px",
-                fontWeight: 600,
-                color: "#000",
-              },
-            },
-
-            labels: ["Working ", "Not Working "],
-            colors: ["#5d965d", "#ec6871"],
-
-            legend: {
-              position: "bottom",
-            },
-
-            dataLabels: {
-              enabled: true,
-              formatter: (val: number) => `${val.toFixed(1)}%`,
-            },
+          labels: ["IN", "OUT"],
+          colors: ["#5d965d", "#ec6871"],
+          legend: { position: "bottom" },
+          dataLabels: {
+            enabled: true,
+            formatter: (val) => `${val.toFixed(1)}%`,
           },
-        });
-      }
+        },
+      });
 
-      // if (DashboardData.success) {
-      //   setDashboard(DashboardData.data);
-      // }
+      // GIRL CHART
+      setGirlStatus({
+        series: [
+          Number(femaleData?.time_in ?? 0),
+          Number(femaleData?.time_out ?? 0),
+        ],
+        options: {
+          chart: { type: "pie", height: 380, foreColor: "#000" },
+          title: {
+            text: `Total : ${
+              Number(femaleData?.time_in ?? 0) +
+              Number(femaleData?.time_out ?? 0)
+            }`,
+            align: "center",
+          },
+          labels: ["IN", "OUT"],
+          colors: ["#5d965d", "#ec6871"],
+          legend: { position: "bottom" },
+          dataLabels: {
+            enabled: true,
+            formatter: (val) => `${val.toFixed(1)}%`,
+          },
+        },
+      });
+
+      setMaleInfo(maleData);
+      setFemaleInfo(femaleData);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -219,7 +225,10 @@ const Dashboard = () => {
           </h2> */}
         </div>
         <div>
-          <button
+          <p className="text-xl">
+             Last Update On : <span className="font-bold">{lastUpdate}</span>
+          </p>
+          {/* <button
             className="flex gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-800 transition"
             onClick={() => Manualping()}
           >
@@ -232,10 +241,8 @@ const Dashboard = () => {
             >
               <path d="M480-480Zm0 360q-18 0-34.5-6.5T416-146L148-415q-35-35-51.5-80T80-589q0-103 67-177t167-74q48 0 90.5 19t75.5 53q32-34 74.5-53t90.5-19q100 0 167.5 74T880-590q0 49-17 94t-51 80L543-146q-13 13-29 19.5t-34 6.5Zm40-520q10 0 19 5t14 13l68 102h166q7-17 10.5-34.5T801-590q-2-69-46-118.5T645-758q-31 0-59.5 12T536-711l-27 29q-5 6-13 9.5t-16 3.5q-8 0-16-3.5t-14-9.5l-27-29q-21-23-49-36t-60-13q-66 0-110 50.5T160-590q0 18 3 35.5t10 34.5h187q10 0 19 5t14 13l35 52 54-162q4-12 14.5-20t23.5-8Zm12 130-54 162q-4 12-15 20t-24 8q-10 0-19-5t-14-13l-68-102H236l237 237q2 2 3.5 2.5t3.5.5q2 0 3.5-.5t3.5-2.5l236-237H600q-10 0-19-5t-15-13l-34-52Z" />
             </svg>
-            {/* <HeartIcon/> */}
-            {/* <HeartCrackIcon/> */}
             Run Health Check
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -256,7 +263,7 @@ const Dashboard = () => {
                 >
                   <path d="M400-80v-280h-80v-240q0-33 23.5-56.5T400-680h160q33 0 56.5 23.5T640-600v240h-80v280H400Zm80-640q-33 0-56.5-23.5T400-800q0-33 23.5-56.5T480-880q33 0 56.5 23.5T560-800q0 33-23.5 56.5T480-720Z" />
                 </svg>
-                Boy
+                Boys
               </h5>
             </div>
 
@@ -271,22 +278,23 @@ const Dashboard = () => {
                   {/* Button Row */}
                   <div className="flex justify-end mb-3">
                     <div className="flex justify-end mb-3">
-                      {Number(Dashboard?.inactive_Boys) > 0 && (
+                      {maleInfo?.time_out > 0 && (
                         <button
                           className="flex gap-2 px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-700 transition"
                           onClick={() => InactiveList("Boys")}
                         >
                           <DownloadIcon />
-                          Download Not Working Boy
+                          Download Hostel Out Boys
                         </button>
                       )}
                     </div>
                   </div>
 
                   {/* Chart */}
-                  {Number(Dashboard.total_Boys) === 0 ? (
+                  {!maleInfo ||
+                  (maleInfo.time_in == 0 && maleInfo.time_out == 0) ? (
                     <div className="min-h-[325px] grid place-content-center text-gray-500 text-lg">
-                      No Boy Data Available
+                      No Boys Data Available
                     </div>
                   ) : (
                     <ReactApexChart
@@ -318,7 +326,7 @@ const Dashboard = () => {
                 >
                   <path d="M400-80v-240H280l122-308q10-24 31-38t47-14q26 0 47 14t31 38l122 308H560v240H400Zm80-640q-33 0-56.5-23.5T400-800q0-33 23.5-56.5T480-880q33 0 56.5 23.5T560-800q0 33-23.5 56.5T480-720Z" />
                 </svg>
-                Girl
+                Girls
               </h5>
             </div>
 
@@ -341,21 +349,22 @@ const Dashboard = () => {
                     </button>
                   </div> */}
                   <div className="flex justify-end mb-3">
-                    {Number(Dashboard?.inactive_Girls) > 0 && (
+                    {femaleInfo?.time_out > 0 && (
                       <button
                         className="flex gap-2 px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-700 transition"
                         onClick={() => InactiveList("Girls")}
                       >
                         <DownloadIcon />
-                        Download Not Working Girl
+                        Download Hostel Out Girls
                       </button>
                     )}
                   </div>
 
                   {/* Girl STATUS PIE CHART */}
-                  {Number(Dashboard.total_Girls) === 0 ? (
+                  {!femaleInfo ||
+                  (femaleInfo.time_in == 0 && femaleInfo.time_out == 0) ? (
                     <div className="min-h-[325px] grid place-content-center text-gray-500 text-lg">
-                      No Girl Data Available
+                      No Girls Data Available
                     </div>
                   ) : (
                     <ReactApexChart
@@ -378,6 +387,7 @@ const Dashboard = () => {
             <Tab as={Fragment}>
               {({ selected }) => (
                 <button
+                onClick={() => dashboardGirlandBoy("male")}
                   className={`-mb-[1px] px-4 py-2 border-b-2 transition-all duration-200 rounded-t-lg
         ${
           selected
@@ -385,7 +395,7 @@ const Dashboard = () => {
             : "bg-transparent text-gray-600 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-700"
         }`}
                 >
-                  Boy
+                  Boys
                 </button>
               )}
             </Tab>
@@ -393,6 +403,7 @@ const Dashboard = () => {
             <Tab as={Fragment}>
               {({ selected }) => (
                 <button
+                onClick={() => dashboardGirlandBoy("female")}
                   className={`-mb-[1px] px-4 py-2 border-b-2 transition-all duration-200 rounded-t-lg
         ${
           selected
@@ -400,7 +411,7 @@ const Dashboard = () => {
             : "bg-transparent text-gray-600 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-700"
         }`}
                 >
-                  Girl
+                  Girls
                 </button>
               )}
             </Tab>
@@ -411,7 +422,7 @@ const Dashboard = () => {
               <div className="active pt-5">
                 <div className="flex justify-between mb-4">
                   <h2 className="text-2xl font-semibold text-gray-800 dark:text-black">
-                    Boy List
+                    Boys List
                   </h2>
 
                   <input
@@ -426,120 +437,89 @@ const Dashboard = () => {
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Image
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                           Name
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                           Reg No 
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Gender
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Action
-                          </th>
-                          {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Is Working
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
-                          </th> */}
-                        </tr>
-                      </thead>
+                       <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Student Image
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Student Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Registration Number
+                </th>
+               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                 Time In
+                </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                 Time OUT
+                </th>
+              </tr>
+            </thead>
 
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredBoys.map((data: any) => (
-                          <tr key={data.id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                {/* <div className="flex-shrink-0 h-10 w-10">
-                                  <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
+                    <tbody className="bg-white divide-y divide-gray-200">
+              {filteredBoys?.map((stu) => (
+                <tr key={stu.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <img
+                        src={stu.student_image ? stu.student_image : noImage}
+                        alt="Profile"
+                        className="w-24 h-24 rounded-lg object-cover border-2 border-gray-300 shadow-lg"
+                      />
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      {/* <div className="flex-shrink-0 h-10 w-10">
+                        <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
                           <span className="text-white font-medium">
-                            {n?.asset_no?.charAt(0)?.toUpperCase()}
+                            {block.name.charAt(0).toUpperCase()}
                           </span>
                         </div>
-                                </div> */}
-                                <div className="">
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {data.asset_no}
-                                  </div>
-                                  {/* <div className="text-sm text-gray-500">{user.email}</div> */}
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">
-                                {data.model_name}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">
-                                {data.block_name} &gt; {data.floor_name} &gt;{" "}
-                                {data.location_name}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">
-                                {data.ip_address}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">
-                                {data.last_working_on
-                                  ? new Date(data.last_working_on)
-                                      .toLocaleString("en-GB", {
-                                        day: "2-digit",
-                                        month: "short",
-                                        year: "numeric",
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                        hour12: true,
-                                      })
-                                      .replace(/ /g, "-")
-                                      .replace(",-", " ")
-                                  : "-"}
-                              </div>
-                            </td>
+                      </div> */}
+                      <div className="">
+                        <div className="text-sm font-medium text-gray-900">
+                          {stu.name}
+                        </div>
+                        {/* <div className="text-sm text-gray-500">{user.email}</div> */}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">
+                      {stu.register_number}
+                    </div>
+                  </td>
+                 <td className="px-6 py-4 whitespace-nowrap">
+  {stu.time_in ? (
+    <span className="px-3 py-1 rounded-full bg-green-200 text-green-800 font-medium">
+      {stu.time_in}
+    </span>
+  ) : (
+    <span className="text-gray-600">-</span>
+  )}
+</td>
 
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm">
-                                {data.is_working == 0 ? (
-                                  <span className="px-3 py-1 rounded-full bg-red-200 text-red-800 font-medium">
-                                    Not Working
-                                  </span>
-                                ) : (
-                                  <span className="px-3 py-1 rounded-full bg-green-200 text-green-800 font-medium">
-                                    Working
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm">
-                                {data.status == 0 ? (
-                                  <span className="px-3 py-1 rounded-full bg-red-200 text-red-800 font-medium">
-                                    Inactive
-                                  </span>
-                                ) : (
-                                  <span className="px-3 py-1 rounded-full bg-green-200 text-green-800 font-medium">
-                                    Active
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                            {/* <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-500">
-                                  {data.status}
-                                </div>
-                              </td> */}
-                          </tr>
-                        ))}
-                      </tbody>
+
+<td className="px-6 py-4 whitespace-nowrap">
+  {stu.time_out ? (
+    <span className="px-3 py-1 rounded-full bg-red-200 text-red-800 font-medium">
+      {stu.time_out}
+    </span>
+  ) : (
+    <span className="text-gray-600">-</span>
+  )}
+</td>
+
+
+                  {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {section.block}
+                  </td> */}
+               
+                </tr>
+              ))}
+            </tbody>
                     </table>
                   </div>
                 </div>
@@ -549,7 +529,7 @@ const Dashboard = () => {
               <div className="active pt-5">
                 <div className="flex justify-between mb-4">
                   <h2 className="text-2xl font-semibold text-gray-800 dark:text-black">
-                    Girl List
+                    Girls List
                   </h2>
 
                   <input
@@ -564,119 +544,87 @@ const Dashboard = () => {
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Image
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                           Name
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                           Reg No 
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Gender
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Action
-                          </th>
-                          {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Is Working
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
-                          </th> */}
-                        </tr>
-                      </thead>
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Student Image
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Student Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Registration Number
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                 Time In
+                </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                 Time OUT
+                </th>
+             
+              </tr>
+            </thead>
 
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredGirls.map((data: any) => (
-                          <tr key={data.id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                {/* <div className="flex-shrink-0 h-10 w-10">
-                                  <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
+              {filteredGirls?.map((stu) => (
+                <tr key={stu.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <img
+                        src={stu.student_image ? stu.student_image : noImage}
+                        alt="Profile"
+                        className="w-24 h-24 rounded-lg object-cover border-2 border-gray-300 shadow-lg"
+                      />
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      {/* <div className="flex-shrink-0 h-10 w-10">
+                        <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
                           <span className="text-white font-medium">
-                            {n?.asset_no?.charAt(0)?.toUpperCase()}
+                            {block.name.charAt(0).toUpperCase()}
                           </span>
                         </div>
-                                </div> */}
-                                <div className="">
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {data.asset_no}
-                                  </div>
-                                  {/* <div className="text-sm text-gray-500">{user.email}</div> */}
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">
-                                {data.model_name}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">
-                                {data.block_name} &gt; {data.floor_name} &gt;{" "}
-                                {data.location_name}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">
-                                {data.ip_address}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">
-                                {data.last_working_on
-                                  ? new Date(data.last_working_on)
-                                      .toLocaleString("en-GB", {
-                                        day: "2-digit",
-                                        month: "short",
-                                        year: "numeric",
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                        hour12: true,
-                                      })
-                                      .replace(/ /g, "-")
-                                      .replace(",-", " ")
-                                  : "-"}
-                              </div>
-                            </td>
+                      </div> */}
+                      <div className="">
+                        <div className="text-sm font-medium text-gray-900">
+                          {stu.name}
+                        </div>
+                        {/* <div className="text-sm text-gray-500">{user.email}</div> */}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">
+                      {stu.register_number}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+  {stu.time_in ? (
+    <span className="px-3 py-1 rounded-full bg-green-200 text-green-800 font-medium">
+      {stu.time_in}
+    </span>
+  ) : (
+    <span className="text-gray-600">-</span>
+  )}
+</td>
 
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm">
-                                {data.is_working == 0 ? (
-                                  <span className="px-3 py-1 rounded-full bg-red-200 text-red-800 font-medium">
-                                    Not Working
-                                  </span>
-                                ) : (
-                                  <span className="px-3 py-1 rounded-full bg-green-200 text-green-800 font-medium">
-                                    Working
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm">
-                                {data.status == 0 ? (
-                                  <span className="px-3 py-1 rounded-full bg-red-200 text-red-800 font-medium">
-                                    Inactive
-                                  </span>
-                                ) : (
-                                  <span className="px-3 py-1 rounded-full bg-green-200 text-green-800 font-medium">
-                                    Active
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                            {/* <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-500">
-                                  {data.status}
-                                </div>
-                              </td> */}
-                          </tr>
-                        ))}
-                      </tbody>
+
+<td className="px-6 py-4 whitespace-nowrap">
+  {stu.time_out ? (
+    <span className="px-3 py-1 rounded-full bg-red-200 text-red-800 font-medium">
+      {stu.time_out}
+    </span>
+  ) : (
+    <span className="text-gray-600">-</span>
+  )}
+</td>
+                  {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {section.block}
+                  </td> */}
+               
+                </tr>
+              ))}
+            </tbody>
                     </table>
                   </div>
                 </div>
