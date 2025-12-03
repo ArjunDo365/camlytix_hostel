@@ -69,7 +69,8 @@ const Dashboard = () => {
 
   useEffect(() => {
     loadData();
-    dashboardGirlandBoy("male");
+dashboardGirlandBoy("male");
+  dashboardGirlandBoy("female");
 
     const now = new Date();
 
@@ -449,40 +450,39 @@ const Dashboard = () => {
       <div className="mb-5 w-full">
         <Tab.Group>
           <Tab.List className="mt-3 flex flex-wrap border-b border-gray-300 dark:border-gray-700">
-            <Tab as={Fragment}>
-              {({ selected }) => (
-                <button
-                  type="button"
-                  onClick={() => dashboardGirlandBoy("male")}
-                  className={`-mb-[1px] px-4 py-2 border-b-2 transition-all duration-200 rounded-t-lg
-        ${
-          selected
-            ? "bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:border-blue-500"
-            : "bg-transparent text-gray-600 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-700"
-        }`}
-                >
-                  Boys
-                </button>
-              )}
-            </Tab>
+  <Tab as={Fragment}>
+    {({ selected }) => (
+      <button
+        type="button"
+        className={`-mb-[1px] px-4 py-2 border-b-2 transition-all duration-200 rounded-t-lg
+          ${
+            selected
+              ? "bg-blue-600 text-white border-blue-600"
+              : "bg-transparent text-gray-600 hover:bg-blue-100"
+          }`}
+      >
+        Boys
+      </button>
+    )}
+  </Tab>
 
-            <Tab as={Fragment}>
-              {({ selected }) => (
-                <button
-                  type="button"
-                  onClick={() => dashboardGirlandBoy("female")}
-                  className={`-mb-[1px] px-4 py-2 border-b-2 transition-all duration-200 rounded-t-lg
-        ${
-          selected
-            ? "bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:border-blue-500"
-            : "bg-transparent text-gray-600 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-700"
-        }`}
-                >
-                  Girls
-                </button>
-              )}
-            </Tab>
-          </Tab.List>
+  <Tab as={Fragment}>
+    {({ selected }) => (
+      <button
+        type="button"
+        className={`-mb-[1px] px-4 py-2 border-b-2 transition-all duration-200 rounded-t-lg
+          ${
+            selected
+              ? "bg-blue-600 text-white border-blue-600"
+              : "bg-transparent text-gray-600 hover:bg-blue-100"
+          }`}
+      >
+        Girls
+      </button>
+    )}
+  </Tab>
+</Tab.List>
+
 
           <Tab.Panels>
             <Tab.Panel unmount={false}>
