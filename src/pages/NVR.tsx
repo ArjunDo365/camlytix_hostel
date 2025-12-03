@@ -11,7 +11,7 @@ import { CommonService } from "../service/commonservice.page";
 const NVR = () => {
   const [showModal, setShowModal] = useState(false);
   const [nvrs, setNvrs] = useState<any[]>([]);
-  const [floors, setFloors] = useState<Section[]>([]);
+  const [floors, setFloors] = useState<any[]>([]);
   const [editingNvr, setEditingNvr] = useState<Nvr | null>(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -325,7 +325,7 @@ const NVR = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">
-                      {n?.floor?.block?.name} &gt; {n?.floor?.name} &gt; {n?.section?.name}
+                      {n?.section?.floor?.block?.name} &gt; {n?.section?.floor?.name} &gt; {n?.section?.name}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -582,7 +582,7 @@ const NVR = () => {
                     <option value="">-- Select Location --</option>
                     {floors.map((f) => (
                       <option key={f.id} value={f.id}>
-                        {f.block_name} &gt; {f.floor_name} &gt; {f.name}
+                        {f?.floor?.block?.name} &gt; {f?.floor?.name} &gt; {f.name}
                       </option>
                     ))}
                   </select>

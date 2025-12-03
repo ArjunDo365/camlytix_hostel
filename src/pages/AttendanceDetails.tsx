@@ -12,12 +12,12 @@ import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import noImage from "../../public/assets/images/noImg.png";
 import Select from "react-select";
-import { Download, ListFilterPlus } from "lucide-react";
+import { Download, Eraser, ListFilterPlus } from "lucide-react";
 import moment from "moment";
 import { CommonHelper } from "../helper/helper";
 import { CommonService } from "../service/commonservice.page";
 
-const col = ["student_no", "student_name", "date","time_out","time_in"];
+const col = ["student_no", "student_name", "date", "time_out", "time_in"];
 
 const AttendanceDetails = () => {
   const [searchText, setSearchText] = useState("");
@@ -125,6 +125,17 @@ const AttendanceDetails = () => {
     // console.log("Selected student:", selectedOption?.student);
   };
 
+  const clearFilter = () => {
+    setSelectedStudent(null);
+    setDateRange([
+      {
+        startDate: new Date(),
+        endDate: new Date(),
+        key: "selection",
+      },
+    ]);
+  };
+
   const staticRanges = [
     {
       label: "Today",
@@ -208,29 +219,36 @@ const AttendanceDetails = () => {
   };
 
   const handleSubmit = async () => {
+    let attData;
     if (!dateRange[0].startDate) {
       CommonHelper.ErrorToaster("Enter Start Date");
       return;
     } else if (!dateRange[0].endDate) {
       CommonHelper.ErrorToaster("Enter End Date");
       return;
-    } else if (!selectedStudent?.student?.register_number) {
-      CommonHelper.ErrorToaster("Select student");
-      return;
     }
+    // else if (!selectedStudent?.student?.register_number) {
+    //   CommonHelper.ErrorToaster("Select student");
+    //   return;
+    // }
     try {
       setLoading(true);
 
       const start_data = moment(dateRange[0].startDate).format("YYYY-MM-DD");
       const end_date = moment(dateRange[0].endDate).format("YYYY-MM-DD");
-      const id = selectedStudent.student.id;
-
-      const attData = await CommonService.GetAll(
-        `/AttendanceList/${start_data}/${end_date}/${id}`
-      );
+      const id = selectedStudent?.student?.id ?? "";
+      if (id) {
+        attData = await CommonService.GetAll(
+          `/AttendanceList/${start_data}/${end_date}/${id}`
+        );
+      } else {
+        attData = await CommonService.GetAll(
+          `/AttendanceList/${start_data}/${end_date}/null`
+        );
+      }
       console.log("att details: ", attData);
       setAttList(attData);
-      setSearchText('');
+      setSearchText("");
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -401,6 +419,13 @@ const AttendanceDetails = () => {
               />
             </div>
             <button
+              onClick={clearFilter}
+              className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-dark transition-colors flex items-center gap-2"
+            >
+              <Eraser size={20} />
+              Clear filter
+            </button>
+            <button
               onClick={handleSubmit}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
             >
@@ -438,7 +463,7 @@ const AttendanceDetails = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {currentItems?.map((stu,index) => (
+                {currentItems?.map((stu, index) => (
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -473,17 +498,19 @@ const AttendanceDetails = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
-                        {moment(stu.date).format('DD-MM-YYYY')}
+                        {moment(stu.date).format("DD-MM-YYYY")}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
-                        {stu.time_out ?? "--"}
+                        <p>{stu.time_out ?? "--"}</p>
+                        {stu.time_out &&(<p className="text-xs text-gray-500">{stu.time_out_name ?? "--"}</p>)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
-                        {stu.time_in ?? "--"}
+                        <p>{stu.time_in ?? "--"}</p>
+                        {stu.time_in &&(<p className="text-xs text-gray-500">{stu.time_in_name ?? "--"}</p>)}
                       </div>
                     </td>
                     {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

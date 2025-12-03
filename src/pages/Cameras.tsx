@@ -12,7 +12,7 @@ const Cameras = () => {
   const [showModal, setShowModal] = useState(false);
   const [cameras, setCameras] = useState<any[]>([]);
   const [nvrs, setNvrs] = useState<Nvr[]>([]);
-  const [sections, setSections] = useState<Section[]>([]);
+  const [sections, setSections] = useState<any[]>([]);
   const [editingCamera, setEditingCamera] = useState<Camera | null>(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -358,7 +358,7 @@ const Cameras = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">
-                      {n?.block?.name} &gt; {n.floor?.name} &gt;{" "}
+                      {n?.section?.floor?.block?.name} &gt; {n?.section?.floor?.name} &gt;{" "}
                       {n.section.name}
                     </div>
                   </td>
@@ -720,7 +720,7 @@ const Cameras = () => {
                     <option value={0}>-- Select Location --</option>
                     {sections.map((section) => (
                       <option key={section.id} value={section.id}>
-                        {section.block_name} &gt; {section.floor_name} &gt;{" "}
+                        {section?.floor?.block?.name} &gt; {section?.floor?.name} &gt;{" "}
                         {section.name}
                       </option>
                     ))}
