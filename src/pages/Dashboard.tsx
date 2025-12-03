@@ -134,34 +134,37 @@ dashboardGirlandBoy("male");
     }
   };
 
-  const exportCSV = (records, gender) => {
-    let columns = Object.keys(records[0]);
+const exportCSV = (records, gender) => {
+  let columns = Object.keys(records[0]);
 
-    // Remove unwanted columns
-    columns = columns.filter((col) => !"student_image".includes(col));
+  // Remove unwanted columns
+  columns = columns.filter(
+    (col) => !["student_image", "time_in"].includes(col)
+  );
 
-    const filename = `${gender}_Timeout_List`;
+  const filename = `${gender}_Timeout_List`;
 
-    const colDelimiter = ";";
-    const lineDelimiter = "\n";
+  const colDelimiter = ";";
+  const lineDelimiter = "\n";
 
-    let csv = columns.join(colDelimiter) + lineDelimiter;
+  let csv = columns.join(colDelimiter) + lineDelimiter;
 
-    records.forEach((row) => {
-      csv += columns.map((col) => row[col] ?? "").join(colDelimiter);
-      csv += lineDelimiter;
-    });
+  records.forEach((row) => {
+    csv += columns.map((col) => row[col] ?? "").join(colDelimiter);
+    csv += lineDelimiter;
+  });
 
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${filename}.csv`;
-    link.click();
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${filename}.csv`;
+  link.click();
 
-    URL.revokeObjectURL(url);
-  };
+  URL.revokeObjectURL(url);
+};
+
 
   const loadData = async () => {
     
