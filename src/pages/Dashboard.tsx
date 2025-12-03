@@ -18,14 +18,13 @@ import { Tab } from "@headlessui/react";
 import ReactApexChart from "react-apexcharts";
 import noImage from "../../public/assets/images/noImg.png";
 
-
 const Dashboard = () => {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [inactivelist, setInactivelist] = useState([]);
   // const [Dashboard, setDashboard] = useState([]);
   const [Dashboard, setDashboard] = useState<any>({});
-    const [lastUpdate, setLastUpdate] = useState("");
+  const [lastUpdate, setLastUpdate] = useState("");
   const [GirlStatus, setGirlStatus] = useState<any>({
     series: [],
     options: {},
@@ -39,6 +38,9 @@ const Dashboard = () => {
   const [searchText, setSearchText] = useState("");
   const [GirlSearchText, setGirlSearchText] = useState("");
 
+  const REFRESH_TIME = 3 * 60; // 3 minutes = 180 seconds
+  const [countdown, setCountdown] = useState(REFRESH_TIME);
+
   const filteredBoys = last10Boys.filter((Boy: any) => {
     const text = searchText.toLowerCase();
 
@@ -46,9 +48,9 @@ const Dashboard = () => {
       Boy.id?.toLowerCase().includes(text) ||
       Boy.register_number?.toLowerCase().includes(text) ||
       Boy.name?.toLowerCase().includes(text) ||
-      Boy.location_name?.toLowerCase().includes(text) ||
-      Boy.floor_name?.toLowerCase().includes(text) ||
-      Boy.block_name?.toLowerCase().includes(text)
+       Boy.branch?.toLowerCase().includes(text) ||
+        Boy.degree?.toLowerCase().includes(text) ||
+         Boy.room_no?.toLowerCase().includes(text) 
     );
   });
 
@@ -59,92 +61,109 @@ const Dashboard = () => {
       cam.id?.toLowerCase().includes(text) ||
       cam.register_number?.toLowerCase().includes(text) ||
       cam.name?.toLowerCase().includes(text) ||
-      cam.location_name?.toLowerCase().includes(text) ||
-      cam.floor_name?.toLowerCase().includes(text) ||
-      cam.block_name?.toLowerCase().includes(text)
+       cam.branch?.toLowerCase().includes(text) ||
+        cam.degree?.toLowerCase().includes(text) ||
+         cam.room_no?.toLowerCase().includes(text) 
     );
   });
 
   useEffect(() => {
-     const now = new Date();
+    loadData();
+    dashboardGirlandBoy("male");
+
+    const now = new Date();
 
     // Format: DD-MMM-YYYY HH:mm
     const formatted =
-      now.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric"
-      }).replace(/ /g, "-") +
+      now
+        .toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })
+        .replace(/ /g, "-") +
       " " +
       now.toLocaleTimeString("en-GB", {
         hour: "2-digit",
         minute: "2-digit",
-        hour12: false
+        hour12: false,
       });
 
     setLastUpdate(formatted);
-    loadData();
-    dashboardGirlandBoy('male');
+
+    // Countdown every 1 second
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          window.location.reload(); // Auto refresh page
+          return REFRESH_TIME; // reset countdown after refresh
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, []);
 
-  const InactiveList = async (data: any) => {
+  // Convert seconds to MM:SS
+  const formatTime = (sec) => {
+    const m = String(Math.floor(sec / 60)).padStart(2, "0");
+    const s = String(sec % 60).padStart(2, "0");
+    return `${m}:${s}`;
+  };
+
+  const InactiveList = async (gender) => {
     try {
-      setLoading(true);
+      const response = await CommonService.GetAll(
+        `/DashBoardStudentList/${gender}`
+      );
 
-      // const result = await window.electronAPI.downloadNotWorkingCSV(data);
-      const result = await CommonService.GetAll("");
+      // Filter students who have timeout value
+      const timeoutList = response.filter((s) => s.time_out);
 
-      if (result.success) {
-        // CommonHelper.SuccessToaster(result.message, result.data.filePath);
-      } else {
-        CommonHelper.ErrorToaster(result.message);
+      if (timeoutList.length === 0) {
+        alert("No timeout students found");
+        return;
       }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+
+      // Export CSV
+      exportCSV(timeoutList, gender);
+    } catch (error) {
+      console.error("Error:", error);
     }
   };
 
-  const Manualping = async () => {
-    setLoading(true);
-    // const Ping = await window.electronAPI.manualPingTrigger();
-    // if (Ping.success) {
-    //   CommonHelper.SuccessToaster(Ping.message);
-    //   loadData();
-    //   dashboardGirlandBoy();
-    // }
-    setLoading(false);
+  const exportCSV = (records, gender) => {
+    let columns = Object.keys(records[0]);
+
+    // Remove unwanted columns
+    columns = columns.filter((col) => !"student_image".includes(col));
+
+    const filename = `${gender}_Timeout_List`;
+
+    const colDelimiter = ";";
+    const lineDelimiter = "\n";
+
+    let csv = columns.join(colDelimiter) + lineDelimiter;
+
+    records.forEach((row) => {
+      csv += columns.map((col) => row[col] ?? "").join(colDelimiter);
+      csv += lineDelimiter;
+    });
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${filename}.csv`;
+    link.click();
+
+    URL.revokeObjectURL(url);
   };
 
- const dashboardGirlandBoy = async (gender) => {
-  try {
-    setLoading(true);
-
-       const FullDashboadData = await CommonService.GetAll(`/DashBoardStudentList/${gender}`);
-
-
-    // if (FullDashboadData.success) {
-      const list = FullDashboadData; // full array
-
-      const filtered = list.filter(item => item.gender === gender);
-
-      if (gender === "male") {
-        setLast10Boys(filtered);
-      } else if (gender === "female") {
-        setLast10Girls(filtered);
-      }
-    // }
-
-    setLoading(false);
-  } catch (error) {
-    console.error("Error loading data:", error);
-  }
-};
-
-
-
   const loadData = async () => {
+    
     try {
       setLoading(true);
 
@@ -216,17 +235,63 @@ const Dashboard = () => {
     }
   };
 
+  const dashboardGirlandBoy = async (gender) => {
+    try {
+      setLoading(true);
+
+      const FullDashboadData = await CommonService.GetAll(
+        `/DashBoardStudentList/${gender}`
+      );
+
+      // if (FullDashboadData.success) {
+      const list = FullDashboadData; // full array
+
+      const filtered = list.filter((item) => item.gender === gender);
+
+      if (gender === "male") {
+        setLast10Boys(filtered);
+      } else if (gender === "female") {
+        setLast10Girls(filtered);
+      }
+      // }
+
+      setLoading(false);
+    } catch (error) {
+      console.error("Error loading data:", error);
+    }
+  };
+
+  const formatDateTime = (dateString: string | null) => {
+    if (!dateString) return "-";
+
+    // Convert "2025-12-02 12:17:21" → "2025-12-02T12:17:21"
+    const date = new Date(dateString.replace(" ", "T"));
+
+    const options: Intl.DateTimeFormatOptions = {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    };
+
+    const formatted = new Intl.DateTimeFormat("en-GB", options).format(date);
+
+    // "02 Dec 2025, 12:17:21" → "02-Dec-2025 12:17:21"
+    return formatted.replace(" ", "-").replace(" ", "-").replace(",", "");
+  };
+
   return (
     <div>
       <div className="flex justify-between mb-4">
-        <div>
-          {/* <h2 className="text-2xl font-semibold text-gray-800 dark:text-black mb-6">
-            Dashboard
-          </h2> */}
+        <div className="text-xl font-semibold text-blue-700 p-3">
+          Page will auto-refresh in: <span>{formatTime(countdown)}</span>
         </div>
         <div>
           <p className="text-xl">
-             Last Update On : <span className="font-bold">{lastUpdate}</span>
+            Last Update On : <span className="font-bold">{lastUpdate}</span>
           </p>
           {/* <button
             className="flex gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-800 transition"
@@ -281,7 +346,7 @@ const Dashboard = () => {
                       {maleInfo?.time_out > 0 && (
                         <button
                           className="flex gap-2 px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-700 transition"
-                          onClick={() => InactiveList("Boys")}
+                          onClick={() => InactiveList("male")}
                         >
                           <DownloadIcon />
                           Download Hostel Out Boys
@@ -352,7 +417,7 @@ const Dashboard = () => {
                     {femaleInfo?.time_out > 0 && (
                       <button
                         className="flex gap-2 px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-700 transition"
-                        onClick={() => InactiveList("Girls")}
+                        onClick={() => InactiveList("female")}
                       >
                         <DownloadIcon />
                         Download Hostel Out Girls
@@ -387,7 +452,8 @@ const Dashboard = () => {
             <Tab as={Fragment}>
               {({ selected }) => (
                 <button
-                onClick={() => dashboardGirlandBoy("male")}
+                  type="button"
+                  onClick={() => dashboardGirlandBoy("male")}
                   className={`-mb-[1px] px-4 py-2 border-b-2 transition-all duration-200 rounded-t-lg
         ${
           selected
@@ -403,7 +469,8 @@ const Dashboard = () => {
             <Tab as={Fragment}>
               {({ selected }) => (
                 <button
-                onClick={() => dashboardGirlandBoy("female")}
+                  type="button"
+                  onClick={() => dashboardGirlandBoy("female")}
                   className={`-mb-[1px] px-4 py-2 border-b-2 transition-all duration-200 rounded-t-lg
         ${
           selected
@@ -418,7 +485,7 @@ const Dashboard = () => {
           </Tab.List>
 
           <Tab.Panels>
-            <Tab.Panel>
+            <Tab.Panel unmount={false}>
               <div className="active pt-5">
                 <div className="flex justify-between mb-4">
                   <h2 className="text-2xl font-semibold text-gray-800 dark:text-black">
@@ -437,95 +504,120 @@ const Dashboard = () => {
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
-                       <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Student Image
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Student Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Registration Number
-                </th>
-               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                 Time In
-                </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                 Time OUT
-                </th>
-              </tr>
-            </thead>
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Student Image
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Student Name
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Registration Number
+                          </th>
+                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Degree
+                          </th>
+                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Branch
+                          </th>
+                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Room No
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Time In
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Time OUT
+                          </th>
+                        </tr>
+                      </thead>
 
-                    <tbody className="bg-white divide-y divide-gray-200">
-              {filteredBoys?.map((stu) => (
-                <tr key={stu.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <img
-                        src={stu.student_image ? stu.student_image : noImage}
-                        alt="Profile"
-                        className="w-24 h-24 rounded-lg object-cover border-2 border-gray-300 shadow-lg"
-                      />
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      {/* <div className="flex-shrink-0 h-10 w-10">
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {filteredBoys?.map((stu) => (
+                          <tr key={stu.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <img
+                                  src={
+                                    stu.student_image
+                                      ? stu.student_image
+                                      : noImage
+                                  }
+                                  alt="Profile"
+                                  className="w-24 h-24 rounded-lg object-cover border-2 border-gray-300 shadow-lg"
+                                />
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                {/* <div className="flex-shrink-0 h-10 w-10">
                         <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
                           <span className="text-white font-medium">
                             {block.name.charAt(0).toUpperCase()}
                           </span>
                         </div>
                       </div> */}
-                      <div className="">
-                        <div className="text-sm font-medium text-gray-900">
-                          {stu.name}
-                        </div>
-                        {/* <div className="text-sm text-gray-500">{user.email}</div> */}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">
-                      {stu.register_number}
-                    </div>
-                  </td>
-                 <td className="px-6 py-4 whitespace-nowrap">
-  {stu.time_in ? (
-    <span className="px-3 py-1 rounded-full bg-green-200 text-green-800 font-medium">
-      {stu.time_in}
-    </span>
-  ) : (
-    <span className="text-gray-600">-</span>
-  )}
-</td>
+                                <div className="">
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {stu.name}
+                                  </div>
+                                  {/* <div className="text-sm text-gray-500">{user.email}</div> */}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-500">
+                                {stu.register_number}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-500">
+                                {stu.degree}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-500">
+                                {stu.branch}
+                              </div>
+                            </td>
+                             <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-500">
+                                {stu.room_no}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {stu.time_in ? (
+                                <span className="px-3 py-1 rounded-full bg-green-200 text-green-800 font-medium">
+                                  {formatDateTime(stu.time_in)}
+                                </span>
+                              ) : (
+                                <span className="text-gray-600">-</span>
+                              )}
+                            </td>
 
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {stu.time_out ? (
+                                <span className="px-3 py-1 rounded-full bg-red-200 text-red-800 font-medium">
+                                  {formatDateTime(stu.time_out)}
+                                </span>
+                              ) : (
+                                <span className="text-gray-600">-</span>
+                              )}
+                            </td>
 
-<td className="px-6 py-4 whitespace-nowrap">
-  {stu.time_out ? (
-    <span className="px-3 py-1 rounded-full bg-red-200 text-red-800 font-medium">
-      {stu.time_out}
-    </span>
-  ) : (
-    <span className="text-gray-600">-</span>
-  )}
-</td>
-
-
-                  {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {section.block}
                   </td> */}
-               
-                </tr>
-              ))}
-            </tbody>
+                          </tr>
+                        ))}
+                      </tbody>
                     </table>
                   </div>
                 </div>
               </div>
             </Tab.Panel>
-            <Tab.Panel>
+            <Tab.Panel unmount={false}>
               <div className="active pt-5">
                 <div className="flex justify-between mb-4">
                   <h2 className="text-2xl font-semibold text-gray-800 dark:text-black">
@@ -544,87 +636,113 @@ const Dashboard = () => {
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Student Image
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Student Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Registration Number
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                 Time In
-                </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                 Time OUT
-                </th>
-             
-              </tr>
-            </thead>
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Student Image
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Student Name
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Registration Number
+                          </th>
+                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Degree
+                          </th>
+                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Branch
+                          </th>
+                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Room No
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Time In
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Time OUT
+                          </th>
+                        </tr>
+                      </thead>
 
                       <tbody className="bg-white divide-y divide-gray-200">
-              {filteredGirls?.map((stu) => (
-                <tr key={stu.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <img
-                        src={stu.student_image ? stu.student_image : noImage}
-                        alt="Profile"
-                        className="w-24 h-24 rounded-lg object-cover border-2 border-gray-300 shadow-lg"
-                      />
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      {/* <div className="flex-shrink-0 h-10 w-10">
+                        {filteredGirls?.map((stu) => (
+                          <tr key={stu.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <img
+                                  src={
+                                    stu.student_image
+                                      ? stu.student_image
+                                      : noImage
+                                  }
+                                  alt="Profile"
+                                  className="w-24 h-24 rounded-lg object-cover border-2 border-gray-300 shadow-lg"
+                                />
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                {/* <div className="flex-shrink-0 h-10 w-10">
                         <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
                           <span className="text-white font-medium">
                             {block.name.charAt(0).toUpperCase()}
                           </span>
                         </div>
                       </div> */}
-                      <div className="">
-                        <div className="text-sm font-medium text-gray-900">
-                          {stu.name}
-                        </div>
-                        {/* <div className="text-sm text-gray-500">{user.email}</div> */}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">
-                      {stu.register_number}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-  {stu.time_in ? (
-    <span className="px-3 py-1 rounded-full bg-green-200 text-green-800 font-medium">
-      {stu.time_in}
-    </span>
-  ) : (
-    <span className="text-gray-600">-</span>
-  )}
-</td>
+                                <div className="">
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {stu.name}
+                                  </div>
+                                  {/* <div className="text-sm text-gray-500">{user.email}</div> */}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-500">
+                                {stu.register_number}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-500">
+                                {stu.degree}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-500">
+                                {stu.branch}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-500">
+                                {stu.room_no}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {stu.time_in ? (
+                                <span className="px-3 py-1 rounded-full bg-green-200 text-green-800 font-medium">
+                                  {formatDateTime(stu.time_in)}
+                                </span>
+                              ) : (
+                                <span className="text-gray-600">-</span>
+                              )}
+                            </td>
 
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {stu.time_out ? (
+                                <span className="px-3 py-1 rounded-full bg-red-200 text-red-800 font-medium">
+                                  {formatDateTime(stu.time_out)}
+                                </span>
+                              ) : (
+                                <span className="text-gray-600">-</span>
+                              )}
+                            </td>
 
-<td className="px-6 py-4 whitespace-nowrap">
-  {stu.time_out ? (
-    <span className="px-3 py-1 rounded-full bg-red-200 text-red-800 font-medium">
-      {stu.time_out}
-    </span>
-  ) : (
-    <span className="text-gray-600">-</span>
-  )}
-</td>
-                  {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {section.block}
                   </td> */}
-               
-                </tr>
-              ))}
-            </tbody>
+                          </tr>
+                        ))}
+                      </tbody>
                     </table>
                   </div>
                 </div>
