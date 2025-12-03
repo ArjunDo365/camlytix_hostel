@@ -16,10 +16,17 @@ import { Download, Eraser, ListFilterPlus } from "lucide-react";
 import moment from "moment";
 import { CommonHelper } from "../helper/helper";
 import { CommonService } from "../service/commonservice.page";
+import { useSelector } from "react-redux";
+import { IRootState } from "../store";
 
 const col = ["student_no", "student_name", "date", "time_out", "time_in"];
 
 const AttendanceDetails = () => {
+   const themeConfig = useSelector((state: IRootState) => state.themeConfig);
+  const semidark = useSelector(
+    (state: IRootState) => state.themeConfig.semidark
+  );
+  const dark_theme = themeConfig.isDarkMode;
   const [searchText, setSearchText] = useState("");
   const [students, setStudents] = useState<any[]>([]);
   const [attList, setAttList] = useState<any[]>([]);
@@ -135,6 +142,7 @@ const AttendanceDetails = () => {
       },
     ]);
   };
+  const isDark = document.documentElement.classList.contains("dark");
 
   const staticRanges = [
     {
@@ -324,10 +332,10 @@ const AttendanceDetails = () => {
     <div>
       <div className="p-6">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white-light">
             Attendance Details
           </h2>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-white-light">
             Search attendence details of students in the hostel
           </p>
         </div>
@@ -357,7 +365,7 @@ const AttendanceDetails = () => {
               <div className="relative" ref={wrapperRef}>
                 <button
                   onClick={() => setIsOpen(!isOpen)}
-                  className="w-64 px-4 py-2 text-left bg-white border border-gray-300 rounded-lg shadow-sm hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent flex items-center justify-between"
+                  className="w-64 px-4 py-2 text-left bg-white border border-gray-300 rounded-lg shadow-sm hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent flex items-center justify-between dark:text-white-light dark:bg-black"
                 >
                   <span className="text-gray-700">{formatDateRange()}</span>
                   <svg
@@ -407,6 +415,8 @@ const AttendanceDetails = () => {
                     ...base,
                     minHeight: "42px",
                     borderColor: "#d1d5db",
+                    backgroundColor: dark_theme ? "#000000" : "#ffffff",
+                    color: dark_theme ? "#ffffff" : "#000000",
                     "&:hover": {
                       borderColor: "#9ca3af",
                     },
@@ -420,7 +430,7 @@ const AttendanceDetails = () => {
             </div>
             <button
               onClick={clearFilter}
-              className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-dark transition-colors flex items-center gap-2"
+              className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-dark transition-colors flex items-center gap-2 border dark:border-white-light"
             >
               <Eraser size={20} />
               Clear filter
@@ -434,7 +444,7 @@ const AttendanceDetails = () => {
             </button>
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden dark:bg-black">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -464,7 +474,7 @@ const AttendanceDetails = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {currentItems?.map((stu, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
+                  <tr key={index} className="hover:bg-gray-50 dark:text-white-light dark:bg-black dark:hover:bg-gray-800">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <img
@@ -484,7 +494,7 @@ const AttendanceDetails = () => {
                         </div>
                       </div> */}
                         <div className="">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white-light">
                             {stu.student_name}
                           </div>
                           {/* <div className="text-sm text-gray-500">{user.email}</div> */}
@@ -497,20 +507,28 @@ const AttendanceDetails = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-black dark:text-white-light">
                         {moment(stu.date).format("DD-MM-YYYY")}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
-                        <p>{stu.time_out ?? "--"}</p>
-                        {stu.time_out &&(<p className="text-xs text-gray-500">{stu.time_out_name ?? "--"}</p>)}
+                        <p className="text-black dark:text-white-light">{stu.time_out ?? "--"}</p>
+                        {stu.time_out && (
+                          <p className="text-xs text-gray-500 dark:text-white-light">
+                            {stu.time_out_name ?? "--"}
+                          </p>
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
-                        <p>{stu.time_in ?? "--"}</p>
-                        {stu.time_in &&(<p className="text-xs text-gray-500">{stu.time_in_name ?? "--"}</p>)}
+                        <p className="text-black dark:text-white-light">{stu.time_in ?? "--"}</p>
+                        {stu.time_in && (
+                          <p className="text-xs text-gray-500 dark:text-white-light">
+                            {stu.time_in_name ?? "--"}
+                          </p>
+                        )}
                       </div>
                     </td>
                     {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -538,7 +556,7 @@ const AttendanceDetails = () => {
             </table>
           </div>
           {filterData.length > 0 && (
-            <div className="flex items-center justify-between m-3 px-4">
+            <div className="flex items-center justify-between m-3 px-4 dark:text-white-light dark:bg-black">
               <div className="text-sm text-gray-700">
                 Showing {indexOfFirstItem + 1} to{" "}
                 {Math.min(indexOfLastItem, filterData.length)} of{" "}

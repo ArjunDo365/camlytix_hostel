@@ -265,11 +265,11 @@ const Student = () => {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-6 dark:text-white-light dark:bg-black">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Student Details</h2>
-          <p className="text-gray-600">Manage Student in the hostel</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white-light">Student Details</h2>
+          <p className="text-gray-600 dark:text-white-light">Manage Student in the hostel</p>
         </div>
 
         <div className="flex gap-2">
@@ -286,14 +286,14 @@ const Student = () => {
           <input
             type="text"
             placeholder="Search..."
-            className="px-3 py-2 border rounded-lg focus:ring focus:ring-purple-300 text-black"
+            className="px-3 py-2 border rounded-lg focus:ring focus:ring-purple-300 text-black dark:text-white-light dark:bg-black"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden dark:text-white-light dark:bg-black">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -320,7 +320,7 @@ const Student = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {currentItems?.map((stu) => (
-                <tr key={stu.id} className="hover:bg-gray-50">
+                <tr key={stu.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white-light dark:bg-black">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <img
@@ -340,7 +340,7 @@ const Student = () => {
                         </div>
                       </div> */}
                       <div className="">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white-light">
                           {stu.name}
                         </div>
                         {/* <div className="text-sm text-gray-500">{user.email}</div> */}
@@ -380,8 +380,8 @@ const Student = () => {
           </table>
         </div>
         {filterData.length > 0 && (
-            <div className="flex items-center justify-between m-3 px-4">
-              <div className="text-sm text-gray-700">
+            <div className="flex items-center justify-between m-3 px-4 dark:text-white-light dark:bg-black">
+              <div className="text-sm text-gray-700 dark:text-white-light dark:bg-black">
                 Showing {indexOfFirstItem + 1} to{" "}
                 {Math.min(indexOfLastItem, filterData.length)} of{" "}
                 {filterData.length} entries
@@ -444,9 +444,9 @@ const Student = () => {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-[75vw] w-full">
+          <div className="bg-white rounded-xl w-[75vw] w-full border dark:border-white-light dark:text-white-light dark:bg-black">
             <div className="p-6 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white-light dark:bg-black">
                 {editingStudent ? "Edit Student" : "Add Student"}
               </h3>
             </div>
@@ -465,7 +465,7 @@ const Student = () => {
                         name: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:text-white-light dark:bg-black"
                     required
                   />
                 </div>
@@ -481,7 +481,7 @@ const Student = () => {
                         gender: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:text-white-light dark:bg-black"
                     required
                   >
                     <option value="" key={0}>
@@ -508,7 +508,7 @@ const Student = () => {
                         register_number: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:text-white-light dark:bg-black"
                     required
                   />
                 </div>
@@ -520,7 +520,7 @@ const Student = () => {
                     type="text"
                     value={formData.mobile_number}
                     onChange={handleMobileNumberChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:text-white-light dark:bg-black"
                     required
                   />
                   
@@ -539,7 +539,7 @@ const Student = () => {
                         email: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:text-white-light dark:bg-black"
                     required
                   />
                 </div>
@@ -556,7 +556,7 @@ const Student = () => {
                         room_no: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:text-white-light dark:bg-black"
                     required
                   />
                 </div>
@@ -573,7 +573,7 @@ const Student = () => {
                         degree: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:text-white-light dark:bg-black"
                     required
                   />
                 </div>
@@ -590,7 +590,7 @@ const Student = () => {
                         branch: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:text-white-light dark:bg-black"
                     required
                   />
                 </div>
@@ -610,14 +610,14 @@ const Student = () => {
                         display_order: parseInt(valueConvert),
                       }));
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:text-white-light dark:bg-black"
                     required
                   />
                 </div>
                 <div className="relative  w-full border-2 border-blue-500 rounded-md p-3 flex items-center justify-evenly w-full">
                   <label
                     htmlFor="profile_image"
-                    className="required-label text-center m-0"
+                    className="required-label text-center m-0 dark:text-white-light"
                   >
                     Image
                   </label>
@@ -677,7 +677,7 @@ const Student = () => {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-gray-200 bg-black hover:bg-black rounded-lg transition-colors flex gap-2 items-center"
+                  className="px-4 py-2 text-gray-200 bg-black hover:bg-black rounded-lg transition-colors flex gap-2 items-center border dark:border-white-light"
                 >
                   <XCircle />
                   Cancel

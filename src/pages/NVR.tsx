@@ -238,8 +238,8 @@ const NVR = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">NVR Details</h2>
-          <p className="text-gray-600">Manage NVRs in the hostel</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white-light">NVR Details</h2>
+          <p className="text-gray-600 dark:text-white-light">Manage NVRs in the hostel</p>
         </div>
 
         <div className="flex gap-2">
@@ -256,7 +256,7 @@ const NVR = () => {
           <input
             type="text"
             placeholder="Search..."
-            className="px-3 py-2 border rounded-lg focus:ring focus:ring-purple-300 text-black"
+            className="px-3 py-2 border rounded-lg focus:ring focus:ring-purple-300 text-black dark:text-white-light dark:bg-black"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
@@ -302,7 +302,7 @@ const NVR = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filterData.map((n) => (
-                <tr key={n.id} className="hover:bg-gray-50">
+                <tr key={n.id} className="hover:bg-gray-50 dark:text-white-light dark:bg-black dark:hover:bg-gray-800">
                   <td className="px-6 py-4 whitespace-nowrap">
                     {/* <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10"> */}
@@ -313,7 +313,7 @@ const NVR = () => {
                         </div> */}
                     {/* </div>
                       <div className=""> */}
-                    <div className="text-sm font-medium text-gray-900">
+                    <div className="text-sm font-medium text-gray-900 dark:text-white-light">
                       {n.asset_no}
                     </div>
                     {/* <div className="text-sm text-gray-500">{user.email}</div> */}
@@ -438,9 +438,9 @@ const NVR = () => {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-100 p-4">
-          <div className="bg-white rounded-xl max-w-[900px] w-full z-60">
+          <div className="bg-white rounded-xl max-w-[900px] w-full z-60 border dark:border-white-light dark:bg-black">
             <div className="p-6 border-b border-gray-200 relative z-60">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white-light">
                 {editingNvr ? "Edit NVR" : "Add NVR"}
               </h3>
             </div>
@@ -459,7 +459,7 @@ const NVR = () => {
                         asset_no: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:text-white-light dark:bg-black"
                     required
                   />
                 </div>
@@ -476,7 +476,7 @@ const NVR = () => {
                         serial_number: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:text-white-light dark:bg-black"
                     required
                   />
                 </div>
@@ -493,7 +493,7 @@ const NVR = () => {
                         model_name: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:text-white-light dark:bg-black"
                     required
                   />
                 </div>
@@ -510,7 +510,7 @@ const NVR = () => {
                         manufacturer: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:text-white-light dark:bg-black"
                     required
                   />
                 </div>
@@ -527,7 +527,7 @@ const NVR = () => {
                         vendor: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:text-white-light dark:bg-black"
                     required
                   />
                 </div>
@@ -555,7 +555,7 @@ const NVR = () => {
                         }));
                       }
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:text-white-light dark:bg-black"
                     required
                   />
                   {errors.ip_address && (
@@ -576,7 +576,7 @@ const NVR = () => {
                         section_id: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:text-white-light dark:bg-black"
                     required
                   >
                     <option value="">-- Select Location --</option>
@@ -645,7 +645,7 @@ const NVR = () => {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-gray-200 bg-black hover:bg-black rounded-lg transition-colors flex gap-2 items-center"
+                  className="px-4 py-2 text-gray-200 bg-black hover:bg-black rounded-lg transition-colors flex gap-2 items-center border dark:border-white-light"
                 >
                   <XCircle />
                   Cancel

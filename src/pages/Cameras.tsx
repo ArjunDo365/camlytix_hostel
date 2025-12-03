@@ -272,8 +272,8 @@ const Cameras = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Camera Details</h2>
-          <p className="text-gray-600">Manage Cameras in the hostel</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white-light">Camera Details</h2>
+          <p className="text-gray-600 dark:text-white-light">Manage Cameras in the hostel</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -289,7 +289,7 @@ const Cameras = () => {
           <input
             type="text"
             placeholder="Search..."
-            className="px-3 py-2 border rounded-lg focus:ring focus:ring-purple-300 text-black"
+            className="px-3 py-2 border rounded-lg focus:ring focus:ring-purple-300 text-black dark:text-white-light dark:bg-black"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
@@ -333,9 +333,9 @@ const Cameras = () => {
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-gray-200 dark:bg-black dark:!text-white-light">
               {filterData?.map((n) => (
-                <tr key={n.id} className="hover:bg-gray-50">
+                <tr key={n.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                   <td className="px-6 py-4 whitespace-nowrap">
                     {/* <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10"> */}
@@ -346,7 +346,7 @@ const Cameras = () => {
                         </div> */}
                     {/* </div>
                       <div className=""> */}
-                    <div className="text-sm font-medium text-gray-900">
+                    <div className="text-sm font-medium text-gray-900 dark:text-white-light">
                       {n.asset_no}
                     </div>
                     {/* <div className="text-sm text-gray-500">{user.email}</div> */}
@@ -469,10 +469,10 @@ const Cameras = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-100 p-4">
-          <div className="bg-white rounded-xl max-w-[900px] w-full relative z-60">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-100 p-4 dark:border-gray-200">
+          <div className="bg-white rounded-xl max-w-[900px] w-full border relative z-60 dark:text-white-light dark:bg-black dark:border-gray-200">
             <div className="p-3 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white-light">
                 {editingCamera ? "Edit Camera" : "Add Camera"}
               </h3>
             </div>
@@ -491,7 +491,7 @@ const Cameras = () => {
                         asset_no: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:border-white-light dark:bg-black"
                     required
                   />
                 </div>
@@ -508,7 +508,7 @@ const Cameras = () => {
                         serial_number: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:border-white-light dark:bg-black"
                     required
                   />
                 </div>
@@ -525,7 +525,7 @@ const Cameras = () => {
                         model_name: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:border-white-light dark:bg-black"
                     required
                   />
                 </div>
@@ -542,7 +542,7 @@ const Cameras = () => {
                         manufacturer: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:border-white-light dark:bg-black"
                     required
                   />
                 </div>
@@ -559,7 +559,7 @@ const Cameras = () => {
                         vendor: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:border-white-light dark:bg-black"
                     required
                   />
                 </div>
@@ -576,7 +576,7 @@ const Cameras = () => {
                         nvr_id: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:border-white-light dark:bg-black"
                     required
                   >
                     <option value={0}>-- Select NVR --</option>
@@ -611,7 +611,7 @@ const Cameras = () => {
                         }));
                       }
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:border-white-light dark:bg-black"
                     required
                   />
                   {errors.ip_address && (
@@ -654,7 +654,7 @@ const Cameras = () => {
                         // );
                       }
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:border-white-light dark:bg-black"
                     required
                   />
                   {errors.port && (
@@ -673,7 +673,7 @@ const Cameras = () => {
                         type: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:border-white-light dark:bg-black"
                     required
                   >
                     <option value={0}>-- Select Type --</option>
@@ -714,7 +714,7 @@ const Cameras = () => {
                         section_id: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:border-white-light dark:bg-black"
                     required
                   >
                     <option value={0}>-- Select Location --</option>
@@ -783,7 +783,7 @@ const Cameras = () => {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-gray-200 bg-black hover:bg-black rounded-lg transition-colors flex gap-2 items-center"
+                  className="px-4 py-2 text-gray-200 bg-black hover:bg-black rounded-lg transition-colors flex gap-2 items-center border dark:border-white-light"
                 >
                   <XCircle />
                   Cancel
