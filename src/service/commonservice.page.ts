@@ -144,7 +144,7 @@ export abstract class CommonService {
       axios
         .get(`${APIURL}${UrlName}`, { responseType: "blob" })
         .then((response) => {
-          console.log("Full Response:", response); // Debugging
+          // console.log("Full Response:", response); // Debugging
           resolve(response); // Pass full response
         })
         .catch((error) => this.handleResponse(resolve, reject, error));

@@ -42,7 +42,7 @@ const AppSettings = () => {
     try {
       setLoading(true);
       const AppSettingData = await CommonService.GetAll("/AppSettingsList");
-      console.log("checking app settings : ", AppSettingData);
+      // console.log("checking app settings : ", AppSettingData);
       // if (AppSettingData.length>0 && Array.isArray(AppSettingData)) {
       //   setAppSettings(AppSettingData.data);
       // } else {

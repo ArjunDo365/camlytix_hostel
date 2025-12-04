@@ -193,7 +193,15 @@ const Header = () => {
             </button>
           </div>
 
-          <div className="ltr:mr-2 rtl:ml-2 hidden sm:block">
+          <div className="ltr:mr-2 rtl:ml-2 hidden hidden md:flex md:justify-end sm:hidden w-[45vw]">
+            <h2 
+  //           style={{
+  //   background: "linear-gradient(to right, #1DA2F3, #28C487)",
+  //   WebkitBackgroundClip: "text",
+  //   WebkitTextFillColor: "transparent",
+  //   color: "transparent"
+  // }} 
+  className="text-2xl font-bold text-gray-600 dark:text-white-light">Hostel Attendance System</h2>
             {/* <ul className="flex items-center space-x-2 rtl:space-x-reverse dark:text-[#d0d2d6]">
                             <li>
                                 <Link to="/apps/calendar" className="block p-2 rounded-full bg-white-light/40 dark:bg-dark/40 hover:text-primary hover:bg-white-light/90 dark:hover:bg-dark/60">

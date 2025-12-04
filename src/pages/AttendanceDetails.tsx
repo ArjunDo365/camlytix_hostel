@@ -254,7 +254,7 @@ const AttendanceDetails = () => {
           `/AttendanceList/${start_data}/${end_date}/null`
         );
       }
-      console.log("att details: ", attData);
+      // console.log("att details: ", attData);
       setAttList(attData);
       setSearchText("");
     } catch (error) {
