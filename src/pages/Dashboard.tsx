@@ -35,8 +35,11 @@ const Dashboard = () => {
 
   const [last10Boys, setLast10Boys] = useState<any[]>([]);
   const [Last10Girls, setLast10Girls] = useState<any[]>([]);
+    const [Last10Stranger, setLast10Stranger] = useState<any[]>([]);
   const [searchText, setSearchText] = useState("");
   const [GirlSearchText, setGirlSearchText] = useState("");
+    const [StrangerSearchText, setStrangerSearchText] = useState("");
+
 
   const REFRESH_TIME = 3 * 60; // 3 minutes = 180 seconds
   const [countdown, setCountdown] = useState(REFRESH_TIME);
@@ -67,11 +70,24 @@ const Dashboard = () => {
     );
   });
 
+  //   const filteredStranger = Last10Stranger.filter((stran: any) => {
+  //   const text = StrangerSearchText.toLowerCase();
+
+  //   return (
+  //     stran.id?.toLowerCase().includes(text) ||
+  //     stran.register_number?.toLowerCase().includes(text) ||
+  //     stran.name?.toLowerCase().includes(text) ||
+  //      stran.branch?.toLowerCase().includes(text) ||
+  //       stran.degree?.toLowerCase().includes(text) ||
+  //        stran.room_no?.toLowerCase().includes(text) 
+  //   );
+  // });
+
   useEffect(() => {
     loadData();
 dashboardGirlandBoy("male");
   dashboardGirlandBoy("female");
-
+dashboardStranger("Stranger");
     const now = new Date();
 
     // Format: DD-MMM-YYYY HH:mm
@@ -240,6 +256,7 @@ const exportCSV = (records, gender) => {
   };
 
   const dashboardGirlandBoy = async (gender) => {
+    
     try {
       setLoading(true);
 
@@ -256,8 +273,28 @@ const exportCSV = (records, gender) => {
         setLast10Boys(filtered);
       } else if (gender === "female") {
         setLast10Girls(filtered);
-      }
+      } 
       // }
+
+      setLoading(false);
+    } catch (error) {
+      console.error("Error loading data:", error);
+    }
+  };
+
+  const dashboardStranger = async (gender) => {
+    
+    try {
+      setLoading(true);
+
+      const FullDashboadData = await CommonService.GetAll(
+        `/DashBoardStudentList/${gender}`
+      );
+
+      const list = FullDashboadData; 
+      
+        setLast10Stranger(list);
+  
 
       setLoading(false);
     } catch (error) {
@@ -323,7 +360,7 @@ const radius = 30;       // smaller than before
               cx="40"
               cy="40"
               r={radius}
-              stroke="#ff6a4d"
+              stroke="#4cbf86"
               strokeWidth="6"
               fill="none"
               strokeLinecap="round"
@@ -334,7 +371,7 @@ const radius = 30;       // smaller than before
           </svg>
 
           {/* Number */}
-          <div className="absolute text-[18px] font-semibold text-[#ff6a4d]">
+          <div className="absolute text-[18px] font-semibold text-[#4cbf86]">
             {countdown}
           </div>
         </div>
@@ -478,6 +515,23 @@ const radius = 30;       // smaller than before
               }`}
           >
             Girls
+          </button>
+        )}
+      </Tab>
+
+       {/* Stranger Tab */}
+      <Tab as={Fragment}>
+        {({ selected }) => (
+          <button
+            type="button"
+            className={`-mb-[1px] px-4 py-2 border-b-2 transition-all duration-200 rounded-t-lg
+              ${
+                selected
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "bg-transparent text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-gray-700"
+              }`}
+          >
+            Stranger
           </button>
         )}
       </Tab>
@@ -706,6 +760,93 @@ const radius = 30;       // smaller than before
                 </tbody>
               </table>
 
+            </div>
+          </div>
+        </div>
+      </Tab.Panel>
+
+       {/* ---------- Stranger PANEL ---------- */}
+      <Tab.Panel unmount={false}>
+        <div className="active pt-5">
+          <div className="flex justify-between mb-4">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+              Stranger List
+            </h2>
+
+            {/* <input
+              type="text"
+              placeholder="Search..."
+              className="px-3 py-2 border rounded-lg focus:ring focus:ring-purple-300 
+                         bg-white text-black dark:bg-gray-800 dark:text-white 
+                         dark:border-gray-600"
+              value={searchText}
+              onChange={(e) => setStrangerSearchText(e.target.value)}
+            /> */}
+          </div>
+
+          {/* Stranger TABLE */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border 
+                          border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                
+                <thead className="bg-gray-100 dark:bg-gray-700">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">Stranger Image</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">Time In</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">Time Out</th>
+                  </tr>
+                </thead>
+
+                <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                  {Last10Stranger?.map((stran) => (
+                    <tr key={stran.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                      
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {/* <img
+                          src={stran.student_image ? stran.student_image : noImage}
+                          alt="Profile"
+                          className="w-24 h-24 rounded-lg object-cover border-2 
+                                     border-gray-300 dark:border-gray-600 shadow-lg"
+                        /> */}
+                        <img
+  src={
+    stran.image
+      ? `https://camlytix.do365tech.in/admin/api/Show/${stran.image}/${stran.date}`
+      : noImage
+  }
+  alt="Profile"
+  className="w-24 h-24 rounded-lg object-cover border-2 
+             border-gray-300 dark:border-gray-600 shadow-lg"
+/>
+                      </td>
+
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {stran.time_in_full ? (
+                          <span className="px-3 py-1 rounded-full bg-green-200 text-green-800 
+                                           dark:bg-green-900 dark:text-green-300 font-medium">
+                            {formatDateTime(stran.time_in_full)}
+                          </span>
+                        ) : (
+                          <span className="text-gray-600 dark:text-gray-400">-</span>
+                        )}
+                      </td>
+
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {stran.time_out_full ? (
+                          <span className="px-3 py-1 rounded-full bg-red-200 text-red-800 
+                                           dark:bg-red-900 dark:text-red-300 font-medium">
+                            {formatDateTime(stran.time_out_full)}
+                          </span>
+                        ) : (
+                          <span className="text-gray-600 dark:text-gray-400">-</span>
+                        )}
+                      </td>
+
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
