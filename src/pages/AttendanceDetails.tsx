@@ -56,7 +56,7 @@ const AttendanceDetails = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchText]);
+  }, [searchText,attList]);
 
   const filterData = attList?.filter((st: any) => {
     const text = searchText?.toLowerCase();
@@ -340,13 +340,13 @@ const AttendanceDetails = () => {
           </p>
         </div>
         <div className="ltr:ml-auto rtl:mr-auto mb-6 flex items-center justify-between">
-          {/* <input
+          <input
             type="text"
             className="form-input w-auto"
             placeholder="Search student name..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-          /> */}
+          />
           <button
             onClick={exportTable}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:bg-gray-400 disabled:text-gray-200 disabled:cursor-not-allowed"

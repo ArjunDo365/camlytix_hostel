@@ -748,7 +748,10 @@ const Cameras = () => {
                   />
                 </div>
                 {editingCamera && (
-                  <div>
+                  <div className="flex items-center gap-3">
+                    <label className="block text-sm font-medium text-gray-700">
+                    Status
+                  </label>
                     <label className="w-12 h-6 relative block">
                       <input
                         type="checkbox"
