@@ -1,6 +1,4 @@
 import moment from "moment";
-import { decrypt } from "./cryptoHelper";
-import { getLocalStorage } from "./localStorageHelper";
 import Swal from "sweetalert2";
 
 export abstract class CommonHelper {
