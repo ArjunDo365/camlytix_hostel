@@ -141,7 +141,7 @@ const NewLogin = () => {
         </div> */}
         <div className="flex p-4 lg:p-8 flex-col items-center w-full lg:w-[80%]">
           <h1 className="text-[22px] font-bold uppercase !leading-snug text-white mb-4 text-center">
-            {t("Sign In To Camlytix")}
+            {t("Hostel Attendance System")}
           </h1>
 
           {/* <button

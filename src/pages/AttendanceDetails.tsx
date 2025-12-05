@@ -430,7 +430,7 @@ const AttendanceDetails = () => {
             </div>
             <button
               onClick={clearFilter}
-              className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-dark transition-colors flex items-center gap-2 border dark:border-white-light"
+              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 border dark:border-white-light"
             >
               <Eraser size={20} />
               Clear filter

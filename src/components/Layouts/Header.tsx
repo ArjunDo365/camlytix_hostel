@@ -37,11 +37,35 @@ import IconMenuForms from "../Icon/Menu/IconMenuForms";
 import IconMenuPages from "../Icon/Menu/IconMenuPages";
 import IconMenuMore from "../Icon/Menu/IconMenuMore";
 import { CommonHelper } from "../../helper/helper";
+import { CommonService } from "../../service/commonservice.page";
+import {
+  Box,
+  Eye,
+  EyeClosed,
+  EyeOff,
+  RotateCcwKey,
+  Save,
+  XCircle,
+} from "lucide-react";
 
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const udata = CommonHelper.GetUserData();
+  const user_id = udata?.id;
+  const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({
+    oldPass: "",
+    newPass: "",
+    confirmPass: "",
+  });
+  const [show, setShow] = useState({
+    oldPass: false,
+    newPass: false,
+    confirmPass: false,
+  });
+  // const user_role = udata?.user_role.name;
+
   useEffect(() => {
     const selector = document.querySelector(
       'ul.horizontal-menu a[href="' + window.location.pathname + '"]'
@@ -142,6 +166,14 @@ const Header = () => {
     },
   ]);
 
+  const resetForm = () => {
+    setFormData({
+      oldPass: "",
+      newPass: "",
+      confirmPass: "",
+    });
+  };
+
   const removeNotification = (value: number) => {
     setNotifications(notifications.filter((user) => user.id !== value));
   };
@@ -160,11 +192,76 @@ const Header = () => {
 
   const { t } = useTranslation();
 
-  const logout = () => {
-    CommonHelper.ClearLocalStorage();
-    navigate("/");
+  const toggle = (field) => {
+    setShow((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
+  const logout = async () => {
+    try {
+      const logData = await CommonService.GetAll(`/UserLogout/${user_id}`);
+      // console.log("logout data: ", logData);
+      if (logData.Type == "S") CommonHelper.SuccessToaster(logData.Message);
+      else CommonHelper.ErrorToaster(logData.Message);
+    } catch (error) {
+      console.error("Error signing out:", error);
+      CommonHelper.ErrorToaster("Error signing out");
+      // alert("An error occurred");
+    } finally {
+      CommonHelper.ClearLocalStorage();
+      navigate("/");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (formData.oldPass.length == 0) {
+      CommonHelper.ErrorToaster("please enter the old password");
+      return;
+    } else if (formData.newPass.length == 0) {
+      CommonHelper.ErrorToaster("please enter the old password");
+      return;
+    } else if (formData.confirmPass.length == 0) {
+      CommonHelper.ErrorToaster("please enter the old password");
+      return;
+    } else if (formData.newPass === formData.oldPass) {
+      CommonHelper.ErrorToaster("New and Old passwords cannot be same");
+      return;
+    } else if (formData.newPass !== formData.confirmPass) {
+      CommonHelper.ErrorToaster("New and Confirm passwords doesn't match");
+      return;
+    }
+
+    try {
+      let result;
+      const payload = {
+        user_id: user_id,
+        old_password: formData.oldPass,
+        password: formData.confirmPass,
+      };
+      /////console.log('payload for block submit: ',formData);
+      result = await CommonService.CommonPost(payload, "/ChangePassword");
+      if (result.Type == "S") CommonHelper.SuccessToaster(result.Message);
+      // console.log('result on block submit',result);
+
+      if (result.Type == "S") {
+        setShowModal(false);
+        resetForm();
+      } else {
+        CommonHelper.ErrorToaster(result.error || "Operation failed");
+        // alert(result.error || "Operation failed");
+      }
+    } catch (error) {
+      console.error("Error saving block:", error);
+      CommonHelper.ErrorToaster("An error occurred");
+      // alert("An error occurred");
+    } finally {
+      CommonHelper.ClearLocalStorage();
+      navigate("/");
+    }
+  };
+
+  // console.log("checking form data: ", formData);
   return (
     <header
       className={`${
@@ -177,7 +274,11 @@ const Header = () => {
             <Link to="/" className="main-logo flex items-center shrink-0">
               <img
                 className="w-11-5 ltr:-ml-1 rtl:-mr-1 inline"
-                src={dark_theme ? "/assets/images/logo.png" : "/assets/images/logo_2.png"}
+                src={
+                  dark_theme
+                    ? "/assets/images/logo.png"
+                    : "/assets/images/logo_2.png"
+                }
                 alt="logo"
               />
               {/* <span className="text-2xl ltr:ml-1.5 rtl:mr-1.5  font-semibold  align-middle hidden md:inline dark:text-white-light transition-all duration-300">VRISTO</span> */}
@@ -194,14 +295,17 @@ const Header = () => {
           </div>
 
           <div className="ltr:mr-2 rtl:ml-2 hidden hidden md:flex md:justify-end sm:hidden w-[45vw]">
-            <h2 
-  //           style={{
-  //   background: "linear-gradient(to right, #1DA2F3, #28C487)",
-  //   WebkitBackgroundClip: "text",
-  //   WebkitTextFillColor: "transparent",
-  //   color: "transparent"
-  // }} 
-  className="text-2xl font-bold text-gray-600 dark:text-white-light">Hostel Attendance System</h2>
+            <h2
+              //           style={{
+              //   background: "linear-gradient(to right, #1DA2F3, #28C487)",
+              //   WebkitBackgroundClip: "text",
+              //   WebkitTextFillColor: "transparent",
+              //   color: "transparent"
+              // }}
+              className="text-2xl font-bold text-gray-600 dark:text-white-light"
+            >
+              Hostel Attendance System
+            </h2>
             {/* <ul className="flex items-center space-x-2 rtl:space-x-reverse dark:text-[#d0d2d6]">
                             <li>
                                 <Link to="/apps/calendar" className="block p-2 rounded-full bg-white-light/40 dark:bg-dark/40 hover:text-primary hover:bg-white-light/90 dark:hover:bg-dark/60">
@@ -470,7 +574,7 @@ const Header = () => {
                   />
                 }
               >
-                <ul className="text-dark dark:text-white-dark !py-0 w-[230px] font-semibold dark:text-white-light/90">
+                <ul className="text-dark dark:text-white-dark !py-0 w-[230px] font-semibold dark:text-white-light/90 !z-50">
                   <li>
                     <div className="flex items-center px-4 py-4">
                       <img
@@ -494,7 +598,14 @@ const Header = () => {
                       </div>
                     </div>
                   </li>
-
+                  <li>
+                    <div className="flex items-center justify-center gap-2 w-full p-3">
+                      <Box size={20} className="text-gray-400" />
+                      <p className="text-gray-400 dark:text-white-light text-center text-base">
+                        version 1.0.0
+                      </p>
+                    </div>
+                  </li>
                   {/* <li>
                     <Link
                       to="/auth/boxed-lockscreen"
@@ -504,6 +615,16 @@ const Header = () => {
                       Lock Screen
                     </Link>
                   </li> */}
+                  <li className="border-t border-white-light dark:border-white-light/10">
+                    <button
+                      type="button"
+                      className="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white flex items-center gap-3"
+                      onClick={() => setShowModal(true)}
+                    >
+                      <RotateCcwKey size={20} />
+                      Change Password
+                    </button>
+                  </li>
                   <li className="border-t border-white-light dark:border-white-light/10">
                     <Link to="/" onClick={logout} className="text-danger !py-3">
                       <IconLogout className="w-4.5 h-4.5 ltr:mr-2 rtl:ml-2 rotate-90 shrink-0" />
@@ -1071,6 +1192,114 @@ const Header = () => {
           </li>
         </ul>
       </div>
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full border dark:border-white-light dark:bg-black dark:text-white-light">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white-light">
+                Change Password
+              </h3>
+            </div>
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Old Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={show.oldPass ? "text" : "password"}
+                    value={formData.oldPass}
+                    onChange={(e) =>
+                      setFormData((prevData) => ({
+                        ...prevData,
+                        oldPass: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:text-white-light dark:bg-black"
+                    required
+                  />
+                  <span
+                    className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
+                    onClick={() => toggle("oldPass")}
+                  >
+                    {show.oldPass ? <Eye /> : <EyeOff />}
+                  </span>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  New Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={show.newPass ? "text" : "password"}
+                    value={formData.newPass}
+                    onChange={(e) =>
+                      setFormData((prevData) => ({
+                        ...prevData,
+                        newPass: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:text-white-light dark:bg-black"
+                    required
+                  />
+                  <span
+                    className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
+                    onClick={() => toggle("newPass")}
+                  >
+                    {show.newPass ? <Eye /> : <EyeOff />}
+                  </span>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={show.confirmPass ? "text" : "password"}
+                    value={formData.confirmPass}
+                    onChange={(e) =>
+                      setFormData((prevData) => ({
+                        ...prevData,
+                        confirmPass: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 dark:text-white-light dark:bg-black"
+                    required
+                  />
+                  <span
+                    className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
+                    onClick={() => toggle("confirmPass")}
+                  >
+                    {show.confirmPass ? <Eye /> : <EyeOff />}
+                  </span>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowModal(false);
+                    resetForm();
+                  }}
+                  className="px-4 py-2 text-gray-200 bg-black hover:bg-black rounded-lg transition-colors flex gap-2 items-center border dark:border-white-light"
+                >
+                  <XCircle />
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors flex gap-2 items-center"
+                >
+                  <RotateCcwKey size={20} />
+                  Change Password
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

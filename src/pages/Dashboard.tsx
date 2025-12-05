@@ -580,8 +580,8 @@ const radius = 30;       // smaller than before
                 </thead>
 
                 <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                  {filteredBoys?.map((stu) => (
-                    <tr key={stu.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  {filteredBoys?.map((stu,index) => (
+                    <tr key={`${index} ${stu.id}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                       
                       <td className="px-6 py-4 whitespace-nowrap">
                         <img
@@ -691,8 +691,8 @@ const radius = 30;       // smaller than before
                 </thead>
 
                 <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                  {filteredGirls?.map((stu) => (
-                    <tr key={stu.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  {filteredGirls?.map((stu,index) => (
+                    <tr key={`${index} ${stu.id}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
 
                       <td className="px-6 py-4 whitespace-nowrap">
                         <img
@@ -799,8 +799,8 @@ const radius = 30;       // smaller than before
                 </thead>
 
                 <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                  {Last10Stranger?.map((stran) => (
-                    <tr key={stran.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  {Last10Stranger?.map((stran,index) => (
+                    <tr key={`${index} ${stran.id}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                       
                       <td className="px-6 py-4 whitespace-nowrap">
                         {/* <img

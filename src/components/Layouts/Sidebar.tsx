@@ -1,7 +1,7 @@
 import PerfectScrollbar from "react-perfect-scrollbar";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { toggleSidebar } from "../../store/themeConfigSlice";
 import AnimateHeight from "react-animate-height";
 import { IRootState } from "../../store";
@@ -34,6 +34,7 @@ import IconMenuDocumentation from "../Icon/Menu/IconMenuDocumentation";
 import {
   AlignVerticalJustifyEnd,
   BookUser,
+  Box,
   Building2,
   Cctv,
   LayoutDashboard,
@@ -44,10 +45,22 @@ import {
 } from "lucide-react";
 import IconUsers from "../Icon/IconUsers";
 import IconSettings from "../Icon/IconSettings";
+import { CommonHelper } from "../../helper/helper";
+import IconLogout from "../Icon/IconLogout";
+import { CommonService } from "../../service/commonservice.page";
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+  const udata = CommonHelper.GetUserData();
+  const user_id = udata?.id;
+  // console.log('checking from side bar: ',user_id)
+  // if (!user_id) navigate("/");
+  const user_role = udata?.user_role?.name;
   const [currentMenu, setCurrentMenu] = useState<string>("");
   const [errorSubMenu, setErrorSubMenu] = useState(false);
+
+  // console.log("checking data from sidebar: ", user_id, user_role);
+
   const themeConfig = useSelector((state: IRootState) => state.themeConfig);
   const semidark = useSelector(
     (state: IRootState) => state.themeConfig.semidark
@@ -89,6 +102,22 @@ const Sidebar = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location]);
 
+  const logout = async () => {
+    try {
+      const logData = await CommonService.GetAll(`/UserLogout/${user_id}`);
+      // console.log("logout data: ", logData);
+      if (logData.Type == "S") CommonHelper.SuccessToaster(logData.Message);
+      else CommonHelper.ErrorToaster(logData.Message);
+    } catch (error) {
+      console.error("Error signing out:", error);
+      CommonHelper.ErrorToaster("Error signing out");
+      // alert("An error occurred");
+    } finally {
+      CommonHelper.ClearLocalStorage();
+      navigate("/");
+    }
+  };
+
   // console.log('themeConfig: ',themeConfig);
   return (
     <div className={semidark ? "dark" : ""}>
@@ -102,7 +131,11 @@ const Sidebar = () => {
             <NavLink to="/" className="main-logo flex items-center shrink-0">
               <img
                 className="w-11-5 ml-[5px] flex-none"
-                src={dark_theme ? "/assets/images/logo.png" : "/assets/images/logo_2.png"}
+                src={
+                  dark_theme
+                    ? "/assets/images/logo.png"
+                    : "/assets/images/logo_2.png"
+                }
                 alt="logo"
               />
               {/* <span className="text-2xl ltr:ml-1.5 rtl:mr-1.5 font-semibold align-middle lg:inline dark:text-white-light">{t('VRISTO')}</span> */}
@@ -133,56 +166,66 @@ const Sidebar = () => {
                   </div>
                 </NavLink>
               </li>
-              <li className="menu nav-item">
-                <NavLink to="/block" className="nav-link group">
-                  <div className="flex items-center">
-                    <Building2 className="group-hover:!text-primary shrink-0" />
-                    <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
-                      Block
-                    </span>
-                  </div>
-                </NavLink>
-              </li>
-              <li className="menu nav-item">
-                <NavLink to="/floor" className="nav-link group">
-                  <div className="flex items-center">
-                    <AlignVerticalJustifyEnd className="group-hover:!text-primary shrink-0" />
-                    <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
-                      Floor
-                    </span>
-                  </div>
-                </NavLink>
-              </li>
-              <li className="menu nav-item">
-                <NavLink to="/section" className="nav-link group">
-                  <div className="flex items-center">
-                    <Ratio className="group-hover:!text-primary shrink-0" />
-                    <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
-                      Section
-                    </span>
-                  </div>
-                </NavLink>
-              </li>
-              <li className="menu nav-item">
-                <NavLink to="/nvr" className="nav-link group">
-                  <div className="flex items-center">
-                    <Router className="group-hover:!text-primary shrink-0" />
-                    <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
-                      NVR
-                    </span>
-                  </div>
-                </NavLink>
-              </li>
-              <li className="menu nav-item">
-                <NavLink to="/camera" className="nav-link group">
-                  <div className="flex items-center">
-                    <Cctv className="group-hover:!text-primary shrink-0" />
-                    <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
-                      Camera
-                    </span>
-                  </div>
-                </NavLink>
-              </li>
+              {user_role == "Super Admin" && (
+                <li className="menu nav-item">
+                  <NavLink to="/block" className="nav-link group">
+                    <div className="flex items-center">
+                      <Building2 className="group-hover:!text-primary shrink-0" />
+                      <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                        Block
+                      </span>
+                    </div>
+                  </NavLink>
+                </li>
+              )}
+              {user_role == "Super Admin" && (
+                <li className="menu nav-item">
+                  <NavLink to="/floor" className="nav-link group">
+                    <div className="flex items-center">
+                      <AlignVerticalJustifyEnd className="group-hover:!text-primary shrink-0" />
+                      <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                        Floor
+                      </span>
+                    </div>
+                  </NavLink>
+                </li>
+              )}
+              {user_role == "Super Admin" && (
+                <li className="menu nav-item">
+                  <NavLink to="/section" className="nav-link group">
+                    <div className="flex items-center">
+                      <Ratio className="group-hover:!text-primary shrink-0" />
+                      <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                        Section
+                      </span>
+                    </div>
+                  </NavLink>
+                </li>
+              )}
+              {user_role == "Super Admin" && (
+                <li className="menu nav-item">
+                  <NavLink to="/nvr" className="nav-link group">
+                    <div className="flex items-center">
+                      <Router className="group-hover:!text-primary shrink-0" />
+                      <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                        NVR
+                      </span>
+                    </div>
+                  </NavLink>
+                </li>
+              )}
+              {user_role == "Super Admin" && (
+                <li className="menu nav-item">
+                  <NavLink to="/camera" className="nav-link group">
+                    <div className="flex items-center">
+                      <Cctv className="group-hover:!text-primary shrink-0" />
+                      <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                        Camera
+                      </span>
+                    </div>
+                  </NavLink>
+                </li>
+              )}
               <li className="menu nav-item">
                 <NavLink to="/student" className="nav-link group">
                   <div className="flex items-center">
@@ -203,7 +246,7 @@ const Sidebar = () => {
                   </div>
                 </NavLink>
               </li>
-              <li className="menu nav-item">
+              {/* <li className="menu nav-item">
                 <NavLink to="/appSettings" className="nav-link group">
                   <div className="flex items-center">
                     <Settings className="group-hover:!text-primary shrink-0" />
@@ -212,8 +255,23 @@ const Sidebar = () => {
                     </span>
                   </div>
                 </NavLink>
-              </li>
+              </li> */}
             </ul>
+            <div className="absolute bottom-0 mt-0 w-full px-3">
+              {/* <div className="flex items-center justify-center gap-2 w-full p-3">
+                <Box size={20} className="text-gray-400" />
+                <p className="text-gray-400 dark:text-white-light text-center text-base">
+                  version 1.0.0
+                </p>
+              </div> */}
+              <button
+                onClick={logout}
+                className="bg-white text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-400 hover:text-white transition-colors flex items-center justify-center gap-3 w-full"
+              >
+                <IconLogout />
+                Sign Out
+              </button>
+            </div>
           </PerfectScrollbar>
         </div>
       </nav>

@@ -46,15 +46,7 @@ const routes = [
     ),
     layout: "default",
   },
-  {
-    path: "/appSettings",
-    element: (
-      <ProtectedRoute>
-        <AppSettings />
-      </ProtectedRoute>
-    ),
-    layout: "default",
-  },
+
   {
     path: "/block",
     element: (
@@ -90,7 +82,8 @@ const routes = [
       </ProtectedRoute>
     ),
     layout: "default",
-  },{
+  },
+  {
     path: "/attendance",
     element: (
       <ProtectedRoute>
@@ -102,3 +95,13 @@ const routes = [
 ];
 
 export { routes };
+
+// {
+//   path: "/appSettings",
+//   element: (
+//     <ProtectedRoute>
+//       <AppSettings />
+//     </ProtectedRoute>
+//   ),
+//   layout: "default",
+// },
