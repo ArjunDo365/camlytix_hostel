@@ -1,8 +1,8 @@
 import axios from "axios";
 import { CommonHelper } from "../helper/helper";
 
-const APIURL = "https://camlytix.do365tech.in/admin/api";
-
+// const APIURL = "https://camlytix.do365tech.in/admin/api";
+const APIURL = "https://hostel.camlytix.ai/admin/api";
 export abstract class CommonService {
   private static setHeaders() {
     // debugger
