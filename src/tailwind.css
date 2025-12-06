@@ -659,3 +659,11 @@ pre.hljs {
 .w-11-5 {
     width: 11.5rem !important;
 }
+
+
+
+.apexcharts-canvas {
+  z-index: 10 !important;
+  position: relative !important;
+}
+

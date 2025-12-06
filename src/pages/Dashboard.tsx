@@ -336,7 +336,7 @@ const radius = 30;       // smaller than before
     {/* ===================== AUTO REFRESH ROW ===================== */}
     <div className="flex justify-between mb-4">
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 z-[-1]">
 
         {/* Text */}
         <p className="text-lg font-semibold">Auto Refresh in</p>
@@ -389,7 +389,7 @@ const radius = 30;       // smaller than before
     <div className="grid xl:grid-cols-2 gap-6 mb-6">
 
       {/* BOYS */}
-      <div className="panel bg-white shadow rounded-2xl pb-3">
+      <div className=" bg-white shadow rounded-2xl pb-3 ">
         <div className="px-5 py-4 border-b flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#111">
             <path d="M400-80v-280h-80v-240q0-33 23.5-56.5T400-680h160q33 0 56.5 23.5T640-600v240h-80v280H400Zm80-640q-33 0-56.5-23.5T400-800q0-33
@@ -434,7 +434,7 @@ const radius = 30;       // smaller than before
       </div>
 
       {/* GIRLS */}
-      <div className="panel bg-white shadow rounded-2xl pb-3">
+      <div className=" bg-white shadow rounded-2xl pb-3 ">
         <div className="px-5 py-4 border-b flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#111">
             <path d="M400-80v-240H280l122-308q10-24 31-38t47-14q26 0 47 14t31 38l122 308H560v240H400Zm80-640q-33
