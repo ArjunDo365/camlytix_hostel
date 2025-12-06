@@ -261,6 +261,29 @@ const Header = () => {
     }
   };
 
+// Hide pie charts when opening modal
+const handleOpenModal = () => {
+  setShowModal(true);
+  const charts = document.querySelectorAll('.pie-chart-dash');
+  charts.forEach(chart => {
+    (chart as HTMLElement).style.display = 'none';
+  });
+};
+
+// Show pie charts when closing modal
+const handleCloseModal = () => {
+  setShowModal(false);
+  resetForm();
+
+  const charts = document.querySelectorAll('.pie-chart-dash');
+  charts.forEach(chart => {
+    (chart as HTMLElement).style.display = 'grid';
+  });
+};
+
+
+
+
   // console.log("checking form data: ", formData);
   return (
     <header
@@ -619,7 +642,7 @@ const Header = () => {
                     <button
                       type="button"
                       className="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white flex items-center gap-3"
-                      onClick={() => setShowModal(true)}
+                       onClick={handleOpenModal}
                     >
                       <RotateCcwKey size={20} />
                       Change Password
@@ -1279,10 +1302,7 @@ const Header = () => {
               <div className="flex justify-end gap-3 pt-4">
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowModal(false);
-                    resetForm();
-                  }}
+                   onClick={handleCloseModal}
                   className="px-4 py-2 text-gray-200 bg-black hover:bg-black rounded-lg transition-colors flex gap-2 items-center border dark:border-white-light"
                 >
                   <XCircle />

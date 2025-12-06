@@ -386,7 +386,7 @@ const radius = 30;       // smaller than before
     </div>
 
     {/* ===================== BOYS & GIRLS PIE CHARTS ===================== */}
-    <div className="grid xl:grid-cols-2 gap-6 mb-6">
+    <div className="grid xl:grid-cols-2 gap-6 mb-6 pie-chart-dash">
 
       {/* BOYS */}
       <div className=" bg-white shadow rounded-2xl pb-3 ">
