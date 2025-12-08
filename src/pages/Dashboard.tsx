@@ -812,7 +812,7 @@ const radius = 30;       // smaller than before
                         <img
   src={
     stran.image
-      ? `https://camlytix.do365tech.in/admin/api/Show/${stran.image}/${stran.date}`
+      ? `https://hostel.camlytix.ai/admin/api/Show/${stran.image}/${stran.date}`
       : noImage
   }
   alt="Profile"
